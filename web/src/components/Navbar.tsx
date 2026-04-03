@@ -7,7 +7,7 @@ const Navbar = () => {
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
-  const links = [
+  const navLinks = [
     { label: "Home", to: "/" },
     { label: "Features", to: "/features" },
     { label: "How It Works", to: "/how-it-works" },
@@ -27,13 +27,13 @@ const Navbar = () => {
           {/* Desktop nav */}
           <div className="hidden lg:flex flex-1 justify-center">
             <div className="liquid-glass rounded-full flex items-center gap-1 px-2 py-1.5">
-              {links.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   to={link.to}
                   className={`text-sm font-medium font-body px-4 py-2 rounded-full transition-colors ${
                     location.pathname === link.to
-                      ? "text-foreground bg-foreground/10"
+                      ? "bg-foreground/10 text-foreground"
                       : "text-foreground/90 hover:bg-foreground/5"
                   }`}
                 >
@@ -80,14 +80,14 @@ const Navbar = () => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {links.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.label}
                 to={link.to}
                 onClick={() => setOpen(false)}
                 className={`text-sm font-medium font-body px-4 py-3 rounded-xl transition-colors ${
                   location.pathname === link.to
-                    ? "text-foreground bg-foreground/10"
+                    ? "bg-foreground/10 text-foreground"
                     : "text-foreground/90 hover:bg-foreground/5"
                 }`}
               >
@@ -102,4 +102,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
 

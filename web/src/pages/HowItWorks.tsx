@@ -1,7 +1,8 @@
 import { motion } from "motion/react";
 import { Upload, Brain, Phone, AlertTriangle, BarChart3, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import PageNavbar from "@/components/PageNavbar";
+import Navbar from "@/components/Navbar";
+
 
 const steps = [
   {
@@ -54,7 +55,8 @@ const fadeUp = {
 const HowItWorksPage = () => {
   return (
     <div className="bg-background min-h-screen">
-      <PageNavbar />
+      <Navbar />
+
 
       {/* Hero */}
       <section className="pt-28 md:pt-40 pb-16 md:pb-24 px-6 md:px-16 lg:px-24 text-center">
