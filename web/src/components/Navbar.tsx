@@ -5,29 +5,15 @@ import { motion, AnimatePresence } from "motion/react";
 
 const Navbar = () => {
   const location = useLocation();
-  const isHome = location.pathname === "/";
   const [open, setOpen] = useState(false);
 
-  const pageLinks = [
+  const links = [
+    { label: "Home", to: "/" },
     { label: "Features", to: "/features" },
     { label: "How It Works", to: "/how-it-works" },
     { label: "Pricing", to: "/pricing" },
     { label: "Contact", to: "/contact" },
   ];
-
-  const sectionLinks = [
-    { label: "Home", section: "hero" },
-    { label: "Features", section: "features" },
-    { label: "How It Works", section: "how-it-works" },
-    { label: "Stats", section: "stats" },
-    { label: "Testimonials", section: "testimonials" },
-  ];
-
-  const scrollToSection = (sectionId: string) => {
-    const el = document.getElementById(sectionId);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-    setOpen(false);
-  };
 
   return (
     <>
@@ -41,25 +27,19 @@ const Navbar = () => {
           {/* Desktop nav */}
           <div className="hidden lg:flex flex-1 justify-center">
             <div className="liquid-glass rounded-full flex items-center gap-1 px-2 py-1.5">
-              {isHome
-                ? sectionLinks.map((link) => (
-                    <button
-                      key={link.label}
-                      onClick={() => scrollToSection(link.section)}
-                      className="text-sm font-medium text-foreground/90 font-body px-4 py-2 rounded-full hover:bg-foreground/5 transition-colors"
-                    >
-                      {link.label}
-                    </button>
-                  ))
-                : pageLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      to={link.to}
-                      className="text-sm font-medium text-foreground/90 font-body px-4 py-2 rounded-full hover:bg-foreground/5 transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+              {links.map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  className={`text-sm font-medium font-body px-4 py-2 rounded-full transition-colors ${
+                    location.pathname === link.to
+                      ? "text-foreground bg-foreground/10"
+                      : "text-foreground/90 hover:bg-foreground/5"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <Link
                 to="/contact"
                 className="bg-foreground text-background rounded-full px-4 py-2 text-sm font-medium font-body flex items-center gap-1.5 hover:bg-foreground/90 transition-colors"
@@ -100,26 +80,20 @@ const Navbar = () => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {isHome
-              ? sectionLinks.map((link) => (
-                  <button
-                    key={link.label}
-                    onClick={() => scrollToSection(link.section)}
-                    className="text-sm font-medium text-foreground/90 font-body px-4 py-3 rounded-xl hover:bg-foreground/5 transition-colors text-left"
-                  >
-                    {link.label}
-                  </button>
-                ))
-              : pageLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    onClick={() => setOpen(false)}
-                    className="text-sm font-medium text-foreground/90 font-body px-4 py-3 rounded-xl hover:bg-foreground/5 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+            {links.map((link) => (
+              <Link
+                key={link.label}
+                to={link.to}
+                onClick={() => setOpen(false)}
+                className={`text-sm font-medium font-body px-4 py-3 rounded-xl transition-colors ${
+                  location.pathname === link.to
+                    ? "text-foreground bg-foreground/10"
+                    : "text-foreground/90 hover:bg-foreground/5"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>

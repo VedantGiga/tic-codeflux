@@ -5,6 +5,10 @@ export const Colors = {
   taken: '#10B981',
   missed: '#EF4444',
   scheduled: '#3B82F6',
+  textWarm: '#FFEDD5',
+  textTertiary: '#64748B',
+  border: 'rgba(255, 255, 255, 0.1)',
+  primary: '#3B82F6',
   glass: {
     border: 'rgba(255, 255, 255, 0.1)',
   }
