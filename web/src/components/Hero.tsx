@@ -51,17 +51,6 @@ const Hero = () => {
               Smart reminders. Gentle nudges. Peace of mind for families.
             </motion.p>
 
-            {/* 3D Model centered */}
-            <motion.div
-              className="w-[80%] max-w-[320px] aspect-square mt-6"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              style={{ filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.5))" }}
-            >
-              <MedicineModel />
-            </motion.div>
-
             {/* CTAs */}
             <motion.div
               className="flex flex-col w-full gap-3 mt-6"
