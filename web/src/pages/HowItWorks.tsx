@@ -2,7 +2,6 @@ import { motion } from "motion/react";
 import { Upload, Brain, Phone, AlertTriangle, BarChart3, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import PageNavbar from "@/components/PageNavbar";
-import Footer from "@/components/Footer";
 
 const steps = [
   {
@@ -114,8 +113,6 @@ const HowItWorksPage = () => {
           <ArrowUpRight className="w-4 h-4" />
         </Link>
       </section>
-
-      <Footer />
     </div>
   );
 };
