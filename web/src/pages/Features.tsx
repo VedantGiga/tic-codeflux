@@ -3,7 +3,8 @@ import {
   Phone, MessageSquare, FileText, Brain, Bell, Users,
   Heart, ShieldCheck, Mic, Globe, BarChart3, Clock,
 } from "lucide-react";
-import PageNavbar from "@/components/PageNavbar";
+import Navbar from "@/components/Navbar";
+
 
 const heroFeatures = [
   {
@@ -88,7 +89,8 @@ const fadeUp = {
 const Features = () => {
   return (
     <div className="bg-background min-h-screen">
-      <PageNavbar />
+      <Navbar />
+
 
       {/* Hero */}
       <section className="pt-28 md:pt-40 pb-16 md:pb-24 px-6 md:px-16 lg:px-24 text-center">
