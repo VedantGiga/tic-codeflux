@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { motion, useInView } from "motion/react";
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import HlsVideo from "./HlsVideo";
 import WaterWaves from "./WaterWaves";
 
@@ -37,56 +37,60 @@ const CtaFooter = () => {
   const footerRef = useRef<HTMLElement>(null);
   const ctaInView = useInView(ctaRef, { once: true, amount: 0.3 });
   const footerInView = useInView(footerRef, { once: true, amount: 0.1 });
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   return (
     <>
       {/* ── Grand CTA Section ─────────────────────────── */}
-      <section className="relative py-32 md:py-40 px-6 md:px-16 lg:px-24 overflow-hidden">
-        <HlsVideo
-          src="https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8"
-          className="absolute inset-0 w-full h-full object-cover z-0"
-        />
-        <div className="video-fade-top" />
-        <div className="video-fade-bottom" />
+      {isHome && (
+        <section className="relative py-32 md:py-40 px-6 md:px-16 lg:px-24 overflow-hidden">
+          <HlsVideo
+            src="https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8"
+            className="absolute inset-0 w-full h-full object-cover z-0"
+          />
+          <div className="video-fade-top" />
+          <div className="video-fade-bottom" />
 
-        <div ref={ctaRef} className="relative z-10 flex flex-col items-center text-center">
-          <motion.h2
-            className="text-5xl md:text-6xl lg:text-7xl font-heading italic text-foreground tracking-tight leading-[0.9] max-w-3xl"
-            initial={{ opacity: 0, y: 40 }}
-            animate={ctaInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
-            Care starts with a single step.
-          </motion.h2>
-          <motion.p
-            className="mt-6 text-foreground/60 font-body font-light text-sm md:text-base max-w-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={ctaInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            Try CareDose AI free for 30 days. No credit card required.
-          </motion.p>
-          <motion.div
-            className="flex items-center gap-4 mt-10"
-            initial={{ opacity: 0, y: 20 }}
-            animate={ctaInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <Link
-              to="/contact"
-              className="liquid-glass-strong rounded-full px-6 py-3 text-sm font-medium font-body text-foreground hover:bg-foreground/5 transition-colors"
+          <div ref={ctaRef} className="relative z-10 flex flex-col items-center text-center">
+            <motion.h2
+              className="text-5xl md:text-6xl lg:text-7xl font-heading italic text-foreground tracking-tight leading-[0.9] max-w-3xl"
+              initial={{ opacity: 0, y: 40 }}
+              animate={ctaInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             >
-              Start Free Trial
-            </Link>
-            <Link
-              to="/pricing"
-              className="bg-foreground text-background rounded-full px-6 py-3 text-sm font-medium font-body hover:bg-foreground/90 transition-colors"
+              Care starts with a single step.
+            </motion.h2>
+            <motion.p
+              className="mt-6 text-foreground/60 font-body font-light text-sm md:text-base max-w-md"
+              initial={{ opacity: 0, y: 20 }}
+              animate={ctaInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
-              View Plans
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+              Try CareDose AI free for 30 days. No credit card required.
+            </motion.p>
+            <motion.div
+              className="flex items-center gap-4 mt-10"
+              initial={{ opacity: 0, y: 20 }}
+              animate={ctaInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <Link
+                to="/contact"
+                className="liquid-glass-strong rounded-full px-6 py-3 text-sm font-medium font-body text-foreground hover:bg-foreground/5 transition-colors"
+              >
+                Start Free Trial
+              </Link>
+              <Link
+                to="/pricing"
+                className="bg-foreground text-background rounded-full px-6 py-3 text-sm font-medium font-body hover:bg-foreground/90 transition-colors"
+              >
+                View Plans
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* ── New Liquid Glass Footer ──────── */}
       <footer className="w-full footer-glass-wrapper text-foreground min-h-[70vh] flex flex-col justify-between pt-6 relative font-body">

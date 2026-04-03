@@ -4,7 +4,6 @@ import {
   Heart, ShieldCheck, Mic, Globe, BarChart3, Clock,
 } from "lucide-react";
 import PageNavbar from "@/components/PageNavbar";
-import Footer from "@/components/Footer";
 
 const heroFeatures = [
   {
@@ -161,8 +160,6 @@ const Features = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };
