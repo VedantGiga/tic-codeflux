@@ -16,7 +16,6 @@ import {
   Users,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion, AnimatePresence } from "motion/react";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
@@ -78,7 +77,7 @@ export default function Dashboard() {
         {/* Sidebar */}
         <aside className="hidden lg:flex w-72 flex-col gap-8 py-6 liquid-glass rounded-3xl border border-border/50 sticky top-[100px] h-[calc(100vh-120px)] overflow-hidden">
           <div className="px-6 flex items-center justify-between">
-            <h2 className="text-xl font-heading tracking-wide italic text-foreground uppercase text-[10px] opacity-50">Patient Profiles</h2>
+            <h2 className="text-xl font-heading tracking-wide italic text-foreground/80 dark:text-foreground/50 uppercase text-[10px] opacity-70 dark:opacity-50">Patient Profiles</h2>
           </div>
 
           <div className="px-4 flex flex-col gap-2 overflow-y-auto max-h-[40%] scrollbar-hide">
@@ -135,9 +134,9 @@ export default function Dashboard() {
               </div>
               <div className="flex-1 overflow-hidden">
                 <p className="text-sm font-medium text-foreground truncate">Caregiver</p>
-                <p className="text-xs text-foreground/50 truncate">Premium Admin</p>
+                <p className="text-xs text-foreground/60 dark:text-foreground/50 truncate">Premium Admin</p>
               </div>
-              <LogOut className="w-4 h-4 text-foreground/50 cursor-pointer hover:text-foreground" />
+              <LogOut className="w-4 h-4 text-foreground/60 dark:text-foreground/50 cursor-pointer hover:text-foreground" />
             </div>
           </div>
         </aside>
@@ -177,10 +176,10 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Stats & Chart */}
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
-                  <div className="liquid-glass-strong rounded-3xl p-8 border border-border/50 flex flex-col relative overflow-hidden group min-h-[300px]">
+                  <div className="liquid-glass-strong rounded-3xl p-8 border border-border/50 bg-white/40 dark:bg-transparent flex flex-col relative overflow-hidden group min-h-[300px]">
                     <div className="flex justify-between items-start mb-6">
                       <div>
-                        <h3 className="text-foreground/50 font-medium text-xs uppercase tracking-widest mb-1 italic">Weekly Adherence Trend</h3>
+                        <h3 className="text-foreground/60 dark:text-foreground/50 font-medium text-xs uppercase tracking-widest mb-1 italic">Weekly Adherence Trend</h3>
                         <div className="flex items-baseline gap-2">
                           <span className="text-5xl font-heading text-foreground italic">{dashData?.adherencePercentage || 0}%</span>
                           <span className="text-green-500 text-sm font-medium flex items-center">

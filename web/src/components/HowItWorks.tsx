@@ -4,12 +4,14 @@ import HlsVideo from "./HlsVideo";
 const HowItWorks = () => {
   return (
     <section id="how-it-works" className="relative min-h-[700px] py-32 px-6 md:px-16 lg:px-24 overflow-hidden">
-      <HlsVideo
-        src="https://stream.mux.com/9JXDljEVWYwWu01PUkAemafDugK89o01BR6zqJ3aS9u00A.m3u8"
-        className="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <div className="video-fade-top" />
-      <div className="video-fade-bottom" />
+      <div className="hidden dark:block">
+        <HlsVideo
+          src="https://stream.mux.com/9JXDljEVWYwWu01PUkAemafDugK89o01BR6zqJ3aS9u00A.m3u8"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+        <div className="video-fade-top" />
+        <div className="video-fade-bottom" />
+      </div>
 
       <div className="relative z-10 flex flex-col items-center justify-center text-center min-h-[500px]">
         <div className="section-badge">How It Works</div>

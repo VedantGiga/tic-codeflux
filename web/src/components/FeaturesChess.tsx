@@ -12,7 +12,7 @@ const FeaturesChess = () => {
           <h3 className="text-2xl md:text-3xl font-heading italic text-foreground tracking-tight">
             Smart reminders that adapt to routines.
           </h3>
-          <p className="text-foreground/60 font-body font-light text-sm max-w-md">
+          <p className="text-muted-foreground font-body font-light text-sm max-w-md">
             CareDose AI learns daily habits and sends gentle, timely reminders
             through voice, text, or app notifications—so no dose is ever missed.
           </p>
@@ -31,7 +31,7 @@ const FeaturesChess = () => {
           <h3 className="text-2xl md:text-3xl font-heading italic text-foreground tracking-tight">
             Family stays connected. Always.
           </h3>
-          <p className="text-foreground/60 font-body font-light text-sm max-w-md">
+          <p className="text-muted-foreground font-body font-light text-sm max-w-md">
             Caregivers and family members get real-time updates when medications
             are taken—or missed. Peace of mind, no matter the distance.
           </p>

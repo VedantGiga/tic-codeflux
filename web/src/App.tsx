@@ -35,7 +35,7 @@ const App = () => {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="dark" forcedTheme="dark" attribute="class">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

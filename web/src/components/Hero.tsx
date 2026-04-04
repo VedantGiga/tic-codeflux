@@ -13,10 +13,12 @@ const Hero = () => {
       {/* Sticky viewport — stays on screen over the 250vh scroll range */}
       <div className="hero-sticky-viewport">
         {/* Background: Scroll-driven frames */}
-        <div className="hero-frames-bg absolute inset-0">
+        <div className="hero-frames-bg absolute inset-0 opacity-20 dark:opacity-100 transition-opacity duration-700">
           <ScrollFrames sectionRef={scrollContainerRef} />
           {/* Top gradient for Navbar blending */}
           <div className="hero-gradient-top" />
+          {/* Light-mode specific gradient for text readability (White from left) */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent dark:from-transparent dark:via-transparent z-[1] transition-all duration-700" />
           {/* Bottom gradient for section transition */}
           <div className="hero-gradient-bottom" />
         </div>
@@ -43,7 +45,7 @@ const Hero = () => {
 
             {/* Subtext */}
             <motion.p
-              className="mt-5 text-foreground/60 font-body font-light text-sm max-w-[85%]"
+              className="mt-5 text-foreground/80 dark:text-foreground/60 font-body font-light text-sm max-w-[85%]"
               initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
               transition={{ delay: 0.8, duration: 0.6 }}
@@ -96,7 +98,7 @@ const Hero = () => {
 
               {/* Subtext */}
               <motion.p
-                className="mt-8 text-foreground/60 font-body font-light text-lg max-w-xl"
+                className="mt-8 text-foreground/80 dark:text-foreground/60 font-body font-light text-lg max-w-xl"
                 initial={{ opacity: 0, filter: "blur(10px)" }}
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 transition={{ delay: 0.8, duration: 0.6 }}
