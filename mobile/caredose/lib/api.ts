@@ -169,6 +169,7 @@ export const authApi = {
 export const patientsApi = {
   getAll: () => api.get<Patient[]>("/patients"),
   getOne: (id: string) => api.get<Patient>(`/patients/${id}`),
+  getByNumber: (number: string) => api.get<Patient>(`/patients/number/${number}`),
   create: (data: { name: string; age: number; phone: string; language: string }) =>
     api.post<Patient>("/patients", data),
   update: (id: string, data: Partial<{ name: string; age: number; phone: string; language: string }>) =>
@@ -192,6 +193,17 @@ export const medicinesApi = {
       endDate?: string | null;
     },
   ) => api.post<Medicine>(`/patients/${patientId}/medicines`, data),
+  createBatch: (
+    patientId: string,
+    medicines: Array<{
+      name: string;
+      dosage: string;
+      frequency: string;
+      times: MedicineTime[];
+      startDate: string;
+      endDate?: string | null;
+    }>,
+  ) => api.post<Medicine[]>(`/patients/${patientId}/medicines/batch`, { medicines }),
   update: (patientId: string, medicineId: string, data: Partial<Medicine>) =>
     api.put<Medicine>(`/patients/${patientId}/medicines/${medicineId}`, data),
   delete: (patientId: string, medicineId: string) =>
@@ -203,9 +215,18 @@ export const logsApi = {
     api.patch(`/logs/${logId}/status`, { status }),
 };
 
+export interface AIExtractedMedicine {
+  name: string;
+  dosage: string;
+  frequency: "daily" | "alternate_days" | "weekly" | "custom";
+  times: MedicineTime[];
+  startDate: string;
+  endDate: string | null;
+}
+
 export const aiApi = {
   parsePrescription: (imageBase64: string) =>
-    api.post<{ medicines: ExtractedMedicine[]; rawText: string }>("/ai/parse-prescription", {
+    api.post<{ medicines: AIExtractedMedicine[]; rawText: string }>("/ai/parse-prescription", {
       imageBase64,
     }),
 };

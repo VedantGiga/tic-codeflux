@@ -99,6 +99,52 @@ export async function createMedicine(req: AuthRequest, res: Response): Promise<v
   }
 }
 
+export async function createMedicinesBatch(req: AuthRequest, res: Response): Promise<void> {
+  const { patientId } = req.params;
+  const medicines = req.body.medicines;
+
+  if (!Array.isArray(medicines)) {
+    res.status(400).json({ error: "ValidationError", message: "Expected an array of medicines" });
+    return;
+  }
+
+  const owned = await verifyPatientOwnership(patientId as string, req.userId!);
+  if (!owned) {
+    res.status(404).json({ error: "NotFound", message: "Patient not found" });
+    return;
+  }
+
+  try {
+    const batch = adminDb.batch();
+    const results: any[] = [];
+
+    for (const med of medicines) {
+      const parseResult = createMedicineSchema.safeParse(med);
+      if (!parseResult.success) {
+        res.status(400).json({ error: "ValidationError", message: `Invalid input for medicine: ${med.name || "unknown"}` });
+        return;
+      }
+
+      const docRef = adminDb.collection(MEDICINES_COLLECTION).doc();
+      const medicineData = {
+        ...parseResult.data,
+        patientId: patientId!,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+      };
+      
+      batch.set(docRef, medicineData);
+      results.push({ id: docRef.id, ...medicineData });
+    }
+
+    await batch.commit();
+    res.status(201).json(results);
+  } catch (error) {
+    logger.error({ error, patientId, userId: req.userId }, "Failed to batch create medicines");
+    res.status(500).json({ error: "FirestoreError", message: "Failed to create medicines" });
+  }
+}
+
 export async function updateMedicine(req: AuthRequest, res: Response): Promise<void> {
   const { patientId, medicineId } = req.params;
 
@@ -115,7 +161,7 @@ export async function updateMedicine(req: AuthRequest, res: Response): Promise<v
   }
 
   try {
-    const docRef = adminDb.collection(MEDICINES_COLLECTION).doc(medicineId!);
+    const docRef = adminDb.collection(MEDICINES_COLLECTION).doc(medicineId as string);
     const doc = await docRef.get();
 
     if (!doc.exists || doc.data()?.patientId !== patientId) {
@@ -141,7 +187,7 @@ export async function deleteMedicine(req: AuthRequest, res: Response): Promise<v
   }
 
   try {
-    const docRef = adminDb.collection(MEDICINES_COLLECTION).doc(medicineId!);
+    const docRef = adminDb.collection(MEDICINES_COLLECTION).doc(medicineId as string);
     const doc = await docRef.get();
 
     if (!doc.exists || doc.data()?.patientId !== patientId) {
@@ -160,7 +206,7 @@ export async function getPatientDashboard(req: AuthRequest, res: Response): Prom
   const { patientId } = req.params;
 
   try {
-    const patientDoc = await adminDb.collection(PATIENTS_COLLECTION).doc(patientId!).get();
+    const patientDoc = await adminDb.collection(PATIENTS_COLLECTION).doc(patientId as string).get();
     if (!patientDoc.exists || patientDoc.data()?.userId !== req.userId) {
       res.status(404).json({ error: "NotFound", message: "Patient not found" });
       return;
@@ -171,7 +217,7 @@ export async function getPatientDashboard(req: AuthRequest, res: Response): Prom
     const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
 
     const medicinesSnapshot = await adminDb.collection(MEDICINES_COLLECTION)
-      .where("patientId", "==", patientId!)
+      .where("patientId", "==", patientId as string)
       .where("isActive", "==", true)
       .get();
     
@@ -199,7 +245,7 @@ export async function getPatientDashboard(req: AuthRequest, res: Response): Prom
     }
 
     const logsSnapshot = await adminDb.collection(LOGS_COLLECTION)
-      .where("patientId", "==", patientId!)
+      .where("patientId", "==", patientId as string)
       .where("scheduledTime", ">=", todayStart.toISOString())
       .where("scheduledTime", "<", todayEnd.toISOString())
       .get();
