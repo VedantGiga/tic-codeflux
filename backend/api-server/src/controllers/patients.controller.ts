@@ -37,8 +37,21 @@ export async function createPatient(req: AuthRequest, res: Response): Promise<vo
   }
 
   try {
+    // Generate unique 6-digit patientNumber
+    let patientNumber = "";
+    let unique = false;
+    while (!unique) {
+      patientNumber = Math.floor(100000 + Math.random() * 900000).toString();
+      const existing = await adminDb.collection(COLLECTION)
+        .where("patientNumber", "==", patientNumber)
+        .limit(1)
+        .get();
+      if (existing.empty) unique = true;
+    }
+
     const docRef = await adminDb.collection(COLLECTION).add({
       ...parseResult.data,
+      patientNumber,
       userId: req.userId!,
       createdAt: new Date().toISOString(),
     });
@@ -51,8 +64,31 @@ export async function createPatient(req: AuthRequest, res: Response): Promise<vo
   }
 }
 
+export async function getPatientByNumber(req: AuthRequest, res: Response): Promise<void> {
+  const patientNumber = req.params.patientNumber as string;
+
+  try {
+    const snapshot = await adminDb.collection(COLLECTION)
+      .where("patientNumber", "==", patientNumber)
+      .where("userId", "==", req.userId!)
+      .limit(1)
+      .get();
+    
+    if (snapshot.empty) {
+      res.status(404).json({ error: "NotFound", message: "Patient not found" });
+      return;
+    }
+
+    const doc = snapshot.docs[0]!;
+    res.json({ id: doc.id, ...doc.data() });
+  } catch (error) {
+    logger.error({ error, patientNumber, userId: req.userId }, "Failed to find patient by number");
+    res.status(500).json({ error: "FirestoreError", message: "Failed to find patient" });
+  }
+}
+
 export async function getPatient(req: AuthRequest, res: Response): Promise<void> {
-  const { patientId } = req.params;
+  const patientId = req.params.patientId as string;
 
   try {
     const doc = await adminDb.collection(COLLECTION).doc(patientId).get();
@@ -70,7 +106,7 @@ export async function getPatient(req: AuthRequest, res: Response): Promise<void>
 }
 
 export async function updatePatient(req: AuthRequest, res: Response): Promise<void> {
-  const { patientId } = req.params;
+  const patientId = req.params.patientId as string;
   const parseResult = updatePatientSchema.safeParse(req.body);
 
   if (!parseResult.success) {
@@ -96,7 +132,7 @@ export async function updatePatient(req: AuthRequest, res: Response): Promise<vo
 }
 
 export async function deletePatient(req: AuthRequest, res: Response): Promise<void> {
-  const { patientId } = req.params;
+  const patientId = req.params.patientId as string;
 
   try {
     const docRef = adminDb.collection(COLLECTION).doc(patientId);
