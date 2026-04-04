@@ -27,15 +27,15 @@ const Contact = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 text-left">
                   <label className="text-sm font-medium text-white/80 ml-1">First Name</label>
-                  <Input 
-                    placeholder="John" 
+                  <Input
+                    placeholder="John"
                     className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-12 rounded-xl focus:ring-accent"
                   />
                 </div>
                 <div className="space-y-2 text-left">
                   <label className="text-sm font-medium text-white/80 ml-1">Last Name</label>
-                  <Input 
-                    placeholder="Doe" 
+                  <Input
+                    placeholder="Doe"
                     className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-12 rounded-xl focus:ring-accent"
                   />
                 </div>
@@ -43,22 +43,22 @@ const Contact = () => {
 
               <div className="space-y-2 text-left">
                 <label className="text-sm font-medium text-white/80 ml-1">Email Address</label>
-                <Input 
-                  type="email" 
-                  placeholder="john@example.com" 
+                <Input
+                  type="email"
+                  placeholder="john@example.com"
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-12 rounded-xl focus:ring-accent"
                 />
               </div>
 
               <div className="space-y-2 text-left">
                 <label className="text-sm font-medium text-white/80 ml-1">Message</label>
-                <Textarea 
-                  placeholder="How can we help you?" 
+                <Textarea
+                  placeholder="How can we help you?"
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/30 min-h-[150px] rounded-xl focus:ring-accent resize-none"
                 />
               </div>
 
-              <Button 
+              <Button
                 className="w-full h-12 rounded-xl bg-white text-black hover:bg-white/90 font-medium tracking-wide transition-all duration-300"
               >
                 Send Message
