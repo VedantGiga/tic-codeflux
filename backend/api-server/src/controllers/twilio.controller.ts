@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { db, activityLogsTable, patientsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { adminDb } from "../lib/firebase-admin.js";
 import { getCallInfo, removeCallInfo } from "../services/twilio.service.js";
 import { logger } from "../lib/logger.js";
+
+const LOGS_COLLECTION = "activity_logs";
 
 export async function handleVoiceWebhook(req: Request, res: Response): Promise<void> {
   const { CallSid, Digits } = req.body as { CallSid?: string; Digits?: string };
@@ -14,14 +15,11 @@ export async function handleVoiceWebhook(req: Request, res: Response): Promise<v
   if (callInfo && Digits) {
     const status = Digits === "1" ? "taken" : "missed";
 
-    await db
-      .update(activityLogsTable)
-      .set({
-        status,
-        source: "call",
-        respondedAt: new Date(),
-      })
-      .where(eq(activityLogsTable.id, callInfo.logId));
+    await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
+      status,
+      source: "call",
+      respondedAt: new Date().toISOString(),
+    });
 
     logger.info({ logId: callInfo.logId, status }, "Medicine status updated via call");
 
@@ -52,10 +50,9 @@ export async function handleStatusWebhook(req: Request, res: Response): Promise<
   if (CallSid && (CallStatus === "completed" || CallStatus === "failed" || CallStatus === "no-answer")) {
     const callInfo = getCallInfo(CallSid);
     if (callInfo && CallStatus === "no-answer") {
-      await db
-        .update(activityLogsTable)
-        .set({ status: "no_response" })
-        .where(eq(activityLogsTable.id, callInfo.logId));
+      await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
+        status: "no_response",
+      });
     }
     if (CallSid) removeCallInfo(CallSid);
   }

@@ -1,32 +1,20 @@
 import { useAuthStore } from "../store/authStore";
 
 const getBaseUrl = (): string => {
-  const domain = process.env["EXPO_PUBLIC_DOMAIN"];
-  const isWeb = typeof window !== "undefined";
-
-  // If we have a domain set (usually via env)
-  if (domain && domain !== "undefined" && domain !== "null") {
-    // In Replit, if the domain is [id].[repl].co and the backend is on 3001,
-    // the backend is actually reachable at [id]-3001.[repl].co
-    if (domain.includes("repl.co") || domain.includes("replit.dev")) {
-      return `https://${domain.replace(".", "-3001.")}/api`;
-    }
-    return `https://${domain}/api`;
+  const apiUrl = process.env["EXPO_PUBLIC_API_URL"];
+  if (apiUrl && apiUrl !== "undefined" && apiUrl !== "null") {
+    return apiUrl.trim();
   }
 
-  // Fallback for web development
+  const isWeb = typeof window !== "undefined";
   if (isWeb) {
     const host = window.location.host;
     if (host.includes(":")) {
-       // Localhost or specific port
        return `http://${host.split(":")[0]}:3001/api`;
-    }
-    if (host.includes("repl.co") || host.includes("replit.dev")) {
-      return `https://${host.replace(".", "-3001.")}/api`;
     }
   }
 
-  return "http://localhost:3001/api"; // Final local fallback
+  return "http://localhost:3001/api";
 };
 
 const BASE_URL = getBaseUrl();
