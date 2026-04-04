@@ -17,7 +17,11 @@ import * as Haptics from "expo-haptics";
 import { Colors } from "@/constants/colors";
 import { medicinesApi, patientsApi } from "@/lib/api";
 import { usePatientStore } from "@/store/patientStore";
+<<<<<<< HEAD
 import ScreenBackground from "@/components/ScreenBackground";
+=======
+import { useAuthStore } from "@/store/authStore";
+>>>>>>> b09eb93d3476b2988d941f24502f9a84dd5c5d37
 import type { Medicine } from "@/lib/api";
 
 function formatTimes(times: Medicine["times"]): string {
@@ -95,10 +99,12 @@ export default function MedicinesScreen() {
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const firebaseReady = useAuthStore((s) => s.firebaseReady);
 
   const { data: patients = [] } = useQuery({
     queryKey: ["patients"],
     queryFn: patientsApi.getAll,
+    enabled: firebaseReady,
   });
 
   const activePatientId = selectedPatientId ?? patients[0]?.id;
@@ -107,7 +113,7 @@ export default function MedicinesScreen() {
   const { data: medicines = [], isLoading } = useQuery({
     queryKey: ["medicines", activePatientId],
     queryFn: () => medicinesApi.getAll(activePatientId!),
-    enabled: !!activePatientId,
+    enabled: !!activePatientId && firebaseReady,
   });
 
   const deleteMutation = useMutation({

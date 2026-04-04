@@ -18,6 +18,7 @@ export function startScheduler(): void {
   cron.schedule("* * * * *", async () => {
     try {
       await checkAndFireReminders();
+      await checkAndFireRetries();
     } catch (err) {
       logger.error({ err }, "Scheduler tick error");
     }
@@ -159,6 +160,56 @@ async function fireReminder(
     }
   } catch (error) {
     logger.error({ error, medicineId: medicine.id }, "Failed to fire reminder");
+  }
+}
+
+async function checkAndFireRetries(): Promise<void> {
+  const nowStr = new Date().toISOString();
+
+  try {
+    const retriesSnapshot = await adminDb.collection(LOGS_COLLECTION)
+      .where("status", "==", "pending_retry")
+      .where("retryAt", "<=", nowStr)
+      .get();
+
+    for (const logDoc of retriesSnapshot.docs) {
+      const log = { id: logDoc.id, ...logDoc.data() } as any;
+
+      const patientDoc = await adminDb.collection(PATIENTS_COLLECTION).doc(log.patientId).get();
+      if (!patientDoc.exists) continue;
+      const patient = { id: patientDoc.id, ...patientDoc.data() } as any;
+
+      logger.info(
+        { logId: log.id, patientName: patient.name, medicine: log.medicineName },
+        "Firing medicine reminder RETRY call",
+      );
+
+      const callSid = await makeReminderCall(
+        patient.phone,
+        patient.name,
+        log.medicineName,
+        log.dosage,
+        patient.language,
+      );
+
+      if (callSid) {
+        registerCall(callSid, {
+          logId: log.id,
+          patientId: patient.id,
+          medicineName: log.medicineName,
+        });
+
+        // The status remains pending_retry, but callSid is updated.
+        // It's technically retrying now. We rely on the webhook to mark it missed or taken.
+        await adminDb.collection(LOGS_COLLECTION).doc(log.id).update({ callSid, source: "call" });
+      }
+    }
+  } catch (error: any) {
+    if (error.code === 9) {
+       logger.error("Firestore Index missing for pending_retry query (status: ASC, retryAt: ASC).");
+    } else {
+       logger.error({ error }, "Error checking retries in Firestore");
+    }
   }
 }
 

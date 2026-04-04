@@ -7,6 +7,10 @@ import {
   ScrollView,
   Alert,
   Platform,
+  Modal,
+  TextInput,
+  Switch,
+  ActivityIndicator,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -17,6 +21,7 @@ import { Colors } from "@/constants/colors";
 import { useAuthStore } from "@/store/authStore";
 import PatientAvatar from "@/components/PatientAvatar";
 import ScreenBackground from "@/components/ScreenBackground";
+import { authApi } from "@/lib/api";
 
 interface SettingItemProps {
   icon: keyof typeof Feather.glyphMap;
@@ -26,16 +31,16 @@ interface SettingItemProps {
   rightText?: string;
 }
 
-function SettingItem({ icon, label, onPress, danger, rightText }: SettingItemProps) {
+function SettingItem({ icon, label, onPress, danger, rightText, rightElement }: SettingItemProps & { rightElement?: React.ReactNode }) {
   return (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress} activeOpacity={0.6}>
+    <TouchableOpacity style={styles.settingItem} onPress={onPress} activeOpacity={0.6} disabled={!!rightElement}>
       <View style={[styles.settingIconWrapper, danger && { backgroundColor: Colors.missedLight }]}>
         <Feather name={icon} size={16} color={danger ? Colors.missed : Colors.textSecondary} />
       </View>
       <Text style={[styles.settingLabel, danger && styles.dangerText]}>{label}</Text>
       <View style={styles.settingRight}>
         {rightText && <Text style={styles.settingRightText}>{rightText}</Text>}
-        <Feather name="chevron-right" size={14} color={Colors.textTertiary} />
+        {rightElement ? rightElement : <Feather name="chevron-right" size={14} color={Colors.textTertiary} />}
       </View>
     </TouchableOpacity>
   );
@@ -53,7 +58,13 @@ function GlassSection({ children }: { children: React.ReactNode }) {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, logout } = useAuthStore();
+  const { user, logout, updateUserSettings } = useAuthStore();
+  
+  const [isSmsModalVisible, setIsSmsModalVisible] = React.useState(false);
+  const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [otp, setOtp] = React.useState("");
+  const [isOtpSent, setIsOtpSent] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -71,6 +82,55 @@ export default function ProfileScreen() {
         },
       },
     ]);
+  };
+
+  const toggleSms = async (enabled: boolean) => {
+    if (!user?.smsNumber && enabled) {
+      setIsSmsModalVisible(true);
+      return;
+    }
+    
+    try {
+      updateUserSettings({ smsEnabled: enabled });
+      await authApi.toggleSms(enabled);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch(err) {
+      updateUserSettings({ smsEnabled: !enabled });
+      Alert.alert("Error", "Could not toggle SMS alerts.");
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (phoneNumber.length < 10) return Alert.alert("Error", "Invalid phone number");
+    setIsLoading(true);
+    try {
+      await authApi.sendOtp(phoneNumber);
+      setIsOtpSent(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch(err) {
+      Alert.alert("Error", "Could not send OTP.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.length < 6) return Alert.alert("Error", "Invalid OTP");
+    setIsLoading(true);
+    try {
+      await authApi.verifyOtp(phoneNumber, otp);
+      updateUserSettings({ smsEnabled: true, smsNumber: phoneNumber });
+      setIsSmsModalVisible(false);
+      setIsOtpSent(false);
+      setPhoneNumber("");
+      setOtp("");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Success", "SMS alerts have been setup successfully!");
+    } catch(err) {
+      Alert.alert("Error", "Invalid OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -123,9 +183,18 @@ export default function ProfileScreen() {
               rightText="Twilio"
             />
             <SettingItem
-              icon="bell"
-              label="Notification Preferences"
-              onPress={() => Alert.alert("Coming Soon", "Notification settings coming soon")}
+              icon="message-square"
+              label="SMS Emergency Alerts"
+              onPress={() => {}}
+              rightText={user?.smsNumber ? user.smsNumber : undefined}
+              rightElement={
+                <Switch
+                  value={!!user?.smsEnabled}
+                  onValueChange={toggleSms}
+                  trackColor={{ false: Colors.borderLight, true: Colors.primary }}
+                  thumbColor={Colors.background}
+                />
+              }
             />
           </GlassSection>
         </View>
@@ -160,6 +229,60 @@ export default function ProfileScreen() {
           <Text style={styles.footerVersion}>Version 1.0.0</Text>
         </View>
       </ScrollView>
+
+      {/* SMS Setup Modal */}
+      <Modal visible={isSmsModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Setup SMS Alerts</Text>
+              <TouchableOpacity onPress={() => setIsSmsModalVisible(false)}>
+                <Feather name="x" size={24} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalText}>
+              Receive an SMS alert if a medicine reminder call is missed twice.
+            </Text>
+
+            {!isOtpSent ? (
+              <>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Mobile Number (with +91)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="+919876543210"
+                    placeholderTextColor={Colors.textTertiary}
+                    keyboardType="phone-pad"
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                  />
+                </View>
+                <TouchableOpacity style={styles.primaryButton} onPress={handleSendOtp} disabled={isLoading}>
+                  {isLoading ? <ActivityIndicator color={Colors.background} /> : <Text style={styles.primaryButtonText}>Send OTP</Text>}
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Enter 6-Digit OTP</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="123456"
+                    placeholderTextColor={Colors.textTertiary}
+                    keyboardType="number-pad"
+                    value={otp}
+                    onChangeText={setOtp}
+                    maxLength={6}
+                  />
+                </View>
+                <TouchableOpacity style={styles.primaryButton} onPress={handleVerifyOtp} disabled={isLoading}>
+                  {isLoading ? <ActivityIndicator color={Colors.background} /> : <Text style={styles.primaryButtonText}>Verify & Enable</Text>}
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScreenBackground>
   );
 }
@@ -286,5 +409,65 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "DMSans_400Regular",
     color: Colors.textTertiary,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: "DMSerifDisplay_400Regular",
+    color: Colors.textWarm,
+  },
+  modalText: {
+    fontSize: 15,
+    fontFamily: "DMSans_400Regular",
+    color: Colors.textSecondary,
+    marginBottom: 24,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontFamily: "DMSans_500Medium",
+    color: Colors.textSecondary,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    borderRadius: 12,
+    padding: 16,
+    color: Colors.text,
+    fontSize: 16,
+    fontFamily: "DMSans_400Regular",
+  },
+  primaryButton: {
+    backgroundColor: Colors.primary,
+    padding: 16,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  primaryButtonText: {
+    color: Colors.background,
+    fontSize: 16,
+    fontFamily: "DMSans_600SemiBold",
   },
 });

@@ -17,6 +17,7 @@ import * as Haptics from "expo-haptics";
 import { Colors } from "@/constants/colors";
 import { patientsApi } from "@/lib/api";
 import { usePatientStore } from "@/store/patientStore";
+import { useAuthStore } from "@/store/authStore";
 import PatientAvatar from "@/components/PatientAvatar";
 import type { Patient } from "@/lib/api";
 
@@ -27,10 +28,12 @@ export default function PatientListScreen() {
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const firebaseReady = useAuthStore((s) => s.firebaseReady);
 
   const { data: patients = [], isLoading } = useQuery({
     queryKey: ["patients"],
     queryFn: patientsApi.getAll,
+    enabled: firebaseReady,
   });
 
   const deleteMutation = useMutation({
