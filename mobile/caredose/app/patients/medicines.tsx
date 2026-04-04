@@ -17,11 +17,8 @@ import * as Haptics from "expo-haptics";
 import { Colors } from "@/constants/colors";
 import { medicinesApi, patientsApi } from "@/lib/api";
 import { usePatientStore } from "@/store/patientStore";
-<<<<<<< HEAD
 import ScreenBackground from "@/components/ScreenBackground";
-=======
 import { useAuthStore } from "@/store/authStore";
->>>>>>> b09eb93d3476b2988d941f24502f9a84dd5c5d37
 import type { Medicine } from "@/lib/api";
 
 function formatTimes(times: Medicine["times"]): string {
