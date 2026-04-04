@@ -19,8 +19,13 @@ const Navbar = () => {
       <nav className="fixed top-4 left-0 right-0 z-50 flex items-center justify-center px-4 lg:px-6">
         <div className="flex items-center w-full max-w-6xl">
           {/* Logo */}
-          <Link to="/" className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-foreground/10 flex items-center justify-center font-heading italic text-foreground text-xl flex-shrink-0">
-            C
+          <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-foreground/10 flex items-center justify-center font-heading italic text-foreground text-xl group-hover:bg-foreground/20 transition-colors">
+              C
+            </div>
+            <span className="hidden sm:block font-heading italic text-foreground text-xl tracking-tight">
+              CareDose AI
+            </span>
           </Link>
 
           {/* Desktop nav */}
