@@ -17,6 +17,14 @@ function NativeTabLayout() {
         <Icon sf={{ default: "house", selected: "house.fill" }} />
         <Label>Home</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="scan">
+        <Icon sf={{ default: "barcode.viewfinder", selected: "barcode.viewfinder" }} />
+        <Label>Scan RX</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="add">
+        <Icon sf={{ default: "plus.circle", selected: "plus.circle.fill" }} />
+        <Label>Add Med</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="activity">
         <Icon sf={{ default: "list.bullet", selected: "list.bullet" }} />
         <Label>Activity</Label>
@@ -40,6 +48,8 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="scan" options={{ title: "Scan RX" }} />
+      <Tabs.Screen name="add" options={{ title: "Add Med" }} />
       <Tabs.Screen name="activity" options={{ title: "Activity" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
     </Tabs>

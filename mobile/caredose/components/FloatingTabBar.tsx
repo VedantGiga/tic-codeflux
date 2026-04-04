@@ -77,6 +77,10 @@ function getIconName(routeName: string) {
   switch (routeName) {
     case "index":
       return "home";
+    case "scan":
+      return "scan";
+    case "add":
+      return "plus";
     case "activity":
       return "activity";
     case "profile":
