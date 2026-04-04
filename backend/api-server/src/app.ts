@@ -29,6 +29,17 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
+app.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    message: "CareDose AI Backend is live! 🚀",
+    endpoints: {
+      health: "/api/healthz",
+      auth: "/api/auth",
+    },
+  });
+});
+
 app.use("/api", router);
 
 export default app;
