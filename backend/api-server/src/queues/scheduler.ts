@@ -109,11 +109,17 @@ async function fireReminder(
     .get();
 
   if (!existingSnapshot.empty) {
-    logger.info(
-      { medicineId: medicine.id, scheduledTime },
-      "Reminder already fired for this slot — skipping",
-    );
-    return;
+    const doc = existingSnapshot.docs[0].data();
+    // Only skip if we successfully completed the call before.
+    // This allows re-testing or retrying failed attempts.
+    if (doc.callSid) {
+      logger.info(
+        { medicineId: medicine.id, scheduledTime },
+        "Reminder already completed for this slot — skipping",
+      );
+      return;
+    }
+    // If it's still pending or failed, we will proceed to retry.
   }
 
   try {

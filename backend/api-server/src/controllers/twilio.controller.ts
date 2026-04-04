@@ -6,56 +6,72 @@ import { logger } from "../lib/logger.js";
 const LOGS_COLLECTION = "activity_logs";
 
 export async function handleVoiceWebhook(req: Request, res: Response): Promise<void> {
-  const { CallSid, Digits } = req.body as { CallSid?: string; Digits?: string };
+  try {
+    const { CallSid, Digits } = req.body as { CallSid?: string; Digits?: string };
 
-  logger.info({ CallSid, Digits }, "Twilio voice webhook received");
+    logger.info({ CallSid, Digits }, "Twilio voice webhook received");
 
-  const callInfo = CallSid ? getCallInfo(CallSid) : null;
+    const callInfo = CallSid ? getCallInfo(CallSid) : null;
 
-  if (callInfo && Digits) {
-    const status = Digits === "1" ? "taken" : "missed";
+    if (callInfo && Digits) {
+      const status = Digits === "1" ? "taken" : "missed";
 
-    await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
-      status,
-      source: "call",
-      respondedAt: new Date().toISOString(),
-    });
+      await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
+        status,
+        source: "call",
+        respondedAt: new Date().toISOString(),
+      });
 
-    logger.info({ logId: callInfo.logId, status }, "Medicine status updated via call");
+      logger.info({ logId: callInfo.logId, status }, "Medicine status updated via call");
 
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+      const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="alice">${status === "taken" ? "Thank you. Your medicine has been marked as taken. Stay healthy!" : "Understood. Please take your medicine as soon as possible. Goodbye."}</Say>
   <Hangup/>
 </Response>`;
 
-    res.set("Content-Type", "text/xml");
-    res.send(twiml);
-  } else {
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+      res.set("Content-Type", "text/xml");
+      res.send(twiml);
+    } else {
+      const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="alice">We did not receive your response. Please take your medicine. Goodbye.</Say>
   <Hangup/>
 </Response>`;
+      res.set("Content-Type", "text/xml");
+      res.send(twiml);
+    }
+  } catch (error) {
+    logger.error({ error }, "Error in handleVoiceWebhook");
+    const errorTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="alice">We encountered an internal error processing your response. Please check your CareDose dashboard.</Say>
+  <Hangup/>
+</Response>`;
     res.set("Content-Type", "text/xml");
-    res.send(twiml);
+    res.status(500).send(errorTwiml);
   }
 }
 
 export async function handleStatusWebhook(req: Request, res: Response): Promise<void> {
-  const { CallSid, CallStatus } = req.body as { CallSid?: string; CallStatus?: string };
+  try {
+    const { CallSid, CallStatus } = req.body as { CallSid?: string; CallStatus?: string };
 
-  logger.info({ CallSid, CallStatus }, "Twilio status webhook received");
+    logger.info({ CallSid, CallStatus }, "Twilio status webhook received");
 
-  if (CallSid && (CallStatus === "completed" || CallStatus === "failed" || CallStatus === "no-answer")) {
-    const callInfo = getCallInfo(CallSid);
-    if (callInfo && CallStatus === "no-answer") {
-      await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
-        status: "no_response",
-      });
+    if (CallSid && (CallStatus === "completed" || CallStatus === "failed" || CallStatus === "no-answer")) {
+      const callInfo = getCallInfo(CallSid);
+      if (callInfo && CallStatus === "no-answer") {
+        await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
+          status: "no_response",
+        });
+      }
+      if (CallSid) removeCallInfo(CallSid);
     }
-    if (CallSid) removeCallInfo(CallSid);
-  }
 
-  res.status(200).send("OK");
+    res.status(200).send("OK");
+  } catch (error) {
+    logger.error({ error }, "Error in handleStatusWebhook");
+    res.status(500).send("Internal Server Error");
+  }
 }
