@@ -64,10 +64,15 @@ const Hero = () => {
                 Try CareDose Free
                 <ArrowUpRight className="w-4 h-4" />
               </button>
-              <button className="liquid-glass w-full rounded-2xl px-6 py-4 text-sm font-medium font-body text-foreground/80 flex items-center justify-center gap-2">
+              <a 
+                href="https://youtu.be/27Gc8t7qYYE?si=fXxvrNElSqAQQ-hm" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="liquid-glass w-full rounded-2xl px-6 py-4 text-sm font-medium font-body text-foreground/80 flex items-center justify-center gap-2"
+              >
                 <Play className="w-4 h-4" />
-                See How It Works
-              </button>
+                See Demo
+              </a>
             </motion.div>
           </div>
 
@@ -118,10 +123,15 @@ const Hero = () => {
                   Try CareDose Free
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
-                <button className="rounded-full px-6 py-3 text-sm font-medium font-body text-foreground/80 flex items-center gap-2 hover:text-foreground transition-colors">
+                <a 
+                  href="https://youtu.be/27Gc8t7qYYE?si=fXxvrNElSqAQQ-hm" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="rounded-full px-6 py-3 text-sm font-medium font-body text-foreground/80 flex items-center gap-2 hover:text-foreground transition-colors"
+                >
                   <Play className="w-4 h-4" />
                   See How It Works
-                </button>
+                </a>
               </motion.div>
             </div>
 
