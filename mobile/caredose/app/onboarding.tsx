@@ -24,43 +24,40 @@ import Animated, {
 } from "react-native-reanimated";
 import LottieView from "lottie-react-native";
 import { Colors } from "@/constants/colors";
+import { useTranslation } from "@/lib/i18n";
 
 const { width, height } = Dimensions.get("window");
 
 // We fallback to generated static images if Lottie animations aren't provided yet
-const slides = [
+const getSlides = (t: (key: string) => string) => [
   {
     id: "1",
-    title: "Never Miss\nMedicines Again",
-    subtitle:
-      "CareDose AI sends smart reminders and AI-powered voice calls to ensure your loved ones take their medicines on time — every time.",
+    title: t("ob1_title"),
+    subtitle: t("ob1_sub"),
     image: null,
     lottie: require("@/assets/lottie/Capsule.json"),
     glowColor: "rgba(255, 255, 255, 0.05)",
   },
   {
     id: "2",
-    title: "AI Calls Your\nLoved Ones",
-    subtitle:
-      "Our intelligent voice assistant calls patients in their preferred language — Hindi, English, Tamil and more — confirming medicine intake.",
+    title: t("ob2_title"),
+    subtitle: t("ob2_sub"),
     image: require("@/assets/images/onboarding/ai_calls.png"),
     lottie: null,
     glowColor: "rgba(255, 255, 255, 0.03)",
   },
   {
     id: "3",
-    title: "Track Health\nRemotely",
-    subtitle:
-      "Monitor adherence, view detailed logs, and get instant alerts when a dose is missed. Family care made simple.",
+    title: t("ob3_title"),
+    subtitle: t("ob3_sub"),
     image: null,
     lottie: require("@/assets/lottie/registro.json"),
     glowColor: "rgba(255, 255, 255, 0.04)",
   },
   {
     id: "4",
-    title: "Scan Prescriptions\nInstantly",
-    subtitle:
-      "Point your camera at any prescription and our AI will automatically extract medicines, dosages, and schedules for you.",
+    title: t("ob4_title"),
+    subtitle: t("ob4_sub"),
     image: null,
     lottie: require("@/assets/lottie/Document OCR Scan.json"),
     glowColor: "rgba(255, 255, 255, 0.06)",
@@ -163,6 +160,8 @@ const SlideItem = ({ item, index, scrollX }: { item: any; index: number; scrollX
 };
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
+  const slides = getSlides(t);
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useSharedValue(0);
@@ -221,7 +220,7 @@ export default function OnboardingScreen() {
         </View>
         {currentIndex < slides.length - 1 && (
           <TouchableOpacity onPress={handleSkip} activeOpacity={0.7} style={styles.skipBtn}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t("skip")}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -254,7 +253,7 @@ export default function OnboardingScreen() {
           activeOpacity={0.85}
         >
           <Animated.Text style={styles.nextButtonText}>
-            {currentIndex === slides.length - 1 ? "Get Started" : "Continue"}
+            {currentIndex === slides.length - 1 ? t("get_started") : t("continue")}
           </Animated.Text>
           <Feather
             name={currentIndex === slides.length - 1 ? "arrow-right" : "chevron-right"}
