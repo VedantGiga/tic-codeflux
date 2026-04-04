@@ -40,7 +40,7 @@ const FeaturesGrid = () => {
             <h3 className="text-lg font-heading italic text-foreground mb-2">
               {title}
             </h3>
-            <p className="text-foreground/60 font-body font-light text-sm">
+            <p className="text-muted-foreground font-body font-light text-sm">
               {description}
             </p>
           </div>
@@ -51,4 +51,3 @@ const FeaturesGrid = () => {
 };
 
 export default FeaturesGrid;
-

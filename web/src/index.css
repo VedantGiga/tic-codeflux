@@ -21,8 +21,8 @@
     --secondary: 240 5% 96%;
     --secondary-foreground: 240 6% 10%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 4% 35%;
 
     --accent: 213 45% 67%;
     --accent-foreground: 240 6% 10%;
@@ -30,11 +30,11 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
+    --border: 240 6% 88%;
+    --input: 240 6% 88%;
     --ring: 240 6% 10%;
 
-    --radius: 9999px;
+    --radius: 20px;
 
     --font-heading: 'Instrument Serif', serif;
     --font-body: 'Barlow', sans-serif;
@@ -95,11 +95,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   }
   html, body {
     @apply bg-background text-foreground font-body;
     overflow-x: clip;
     width: 100%;
+    transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
   img, video, canvas {
     max-width: 100%;
@@ -110,21 +112,21 @@
 @layer components {
   /* ── Light Mode Glass ─────────────────────────── */
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 1px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
-    border: 1px solid rgba(0,0,0,0.07);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 1px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+    border: 1px solid rgba(0,0,0,0.06);
     position: relative;
     overflow: hidden;
   }
 
   .liquid-glass-strong {
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    box-shadow: 0 4px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
-    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+    border: 1px solid rgba(0,0,0,0.06);
     position: relative;
     overflow: hidden;
   }
@@ -276,7 +278,7 @@
     left: 0;
     right: 0;
     height: 120px;
-    background: linear-gradient(to bottom, black, transparent);
+    background: linear-gradient(to bottom, hsl(var(--background)), transparent);
     z-index: 2;
     pointer-events: none;
   }
@@ -287,7 +289,7 @@
     left: 0;
     right: 0;
     height: 200px;
-    background: linear-gradient(to top, black, transparent);
+    background: linear-gradient(to top, hsl(var(--background)), transparent);
     z-index: 2;
     pointer-events: none;
   }
@@ -320,7 +322,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: hsl(0 0% 0%);
+    background: hsl(var(--background));
     z-index: 1;
   }
 
@@ -331,7 +333,7 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.5) 50%,
+      currentColor 50%,
       transparent 100%
     );
     animation: shimmer 1.5s ease-in-out infinite;
@@ -362,12 +364,12 @@
     height: 400px;
     background: radial-gradient(
       ellipse at center,
-      rgba(100, 140, 255, 0.04) 0%,
-      rgba(100, 140, 255, 0.01) 40%,
+      rgba(100, 140, 255, 0.08) 0%,
+      rgba(100, 140, 255, 0.02) 40%,
       transparent 70%
     );
     pointer-events: none;
-    filter: blur(60px);
+    filter: blur(80px);
   }
 
   /* ── Water Waves ─────────────────────────────── */

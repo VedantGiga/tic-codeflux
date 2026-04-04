@@ -45,12 +45,14 @@ const CtaFooter = () => {
       {/* ── Grand CTA Section ─────────────────────────── */}
       {isHome && (
         <section className="relative py-32 md:py-40 px-6 md:px-16 lg:px-24 overflow-hidden">
-          <HlsVideo
-            src="https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8"
-            className="absolute inset-0 w-full h-full object-cover z-0"
-          />
-          <div className="video-fade-top" />
-          <div className="video-fade-bottom" />
+          <div className="hidden dark:block">
+            <HlsVideo
+              src="https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8"
+              className="absolute inset-0 w-full h-full object-cover z-0"
+            />
+            <div className="video-fade-top" />
+            <div className="video-fade-bottom" />
+          </div>
 
           <div ref={ctaRef} className="relative z-10 flex flex-col items-center text-center">
             <motion.h2
@@ -92,99 +94,102 @@ const CtaFooter = () => {
         </section>
       )}
 
-      {/* ── New Liquid Glass Footer ──────── */}
-      <footer className="w-full footer-glass-wrapper text-foreground min-h-[70vh] flex flex-col justify-between pt-6 relative font-body">
+      {/* ── Concise Liquid Glass Footer ──────── */}
+      <footer className="w-full footer-glass-wrapper text-foreground py-12 md:py-20 relative font-body overflow-hidden">
         {/* Animated Liquid Waves at the boundary */}
         <WaterWaves />
         {/* Ambient glow */}
         <div className="footer-ambient-glow" />
 
-        {/* Top Header Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-6 md:px-12 w-full text-[13px] md:text-[15px] font-medium tracking-tight relative z-10">
-          <div>CareDose AI®</div>
-          <div className="hidden md:block">Smart Health + Care</div>
-          <div className="hidden md:block">08:53:25 CA, USA</div>
-          <div className="flex justify-between w-full text-right md:text-left">
-            <div className="flex flex-col gap-1">
-              <Link to="/" className="hover:opacity-60 transition-opacity">Work</Link>
-              <Link to="/features" className="hover:opacity-60 transition-opacity">Features</Link>
-              <Link to="/pricing" className="hover:opacity-60 transition-opacity">Pricing</Link>
-              <Link to="/contact" className="hover:opacity-60 transition-opacity">Info</Link>
-            </div>
-            <Link to="/contact" className="hover:opacity-60 transition-opacity ml-auto">Contact</Link>
-          </div>
-        </div>
-
-        {/* Middle Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6 px-6 md:px-12 mt-16 md:mt-24 z-10 w-full max-w-none">
-          {/* Left: Newsletter */}
-          <div className="flex flex-col col-span-1 pl-0 md:pl-24">
-            <div className="w-5 h-5 bg-foreground rounded-full mb-6 mx-auto md:mx-0 shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
-            <h3 className="text-[2rem] md:text-4xl lg:text-[3rem] font-heading leading-[1.0] mb-8 md:mb-10 text-center md:text-left tracking-tight">
-              Get updates from<br/>CareDose
-            </h3>
-            <div className="border-b border-foreground/30 pb-2 flex justify-between items-center group cursor-pointer w-full max-w-[280px] mx-auto md:mx-0">
-              <span className="text-[15px] opacity-90">Email address</span>
-              <ArrowUpRight className="w-4 h-4 opacity-90 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            </div>
-          </div>
-
-          {/* Center: Contact Info */}
-          <div className="flex flex-col text-[15px] md:text-base gap-8 md:gap-10 mt-4 md:mt-0 text-center md:text-left md:pl-12 opacity-90 font-medium tracking-tight">
-            <div>
-              <a href="mailto:contact@curedose.com" className="block hover:opacity-60 transition-opacity">contact@curedose.com</a>
-              <a href="tel:+18001234567" className="block mt-1 hover:opacity-60 transition-opacity">+1 800 123 4567</a>
-            </div>
-            <div>
-              <p>123 Health Ave</p>
-              <p>San Francisco, CA 94103</p>
-              <p>United States</p>
-            </div>
-          </div>
-
-          {/* Right: Links & Legal */}
-          <div className="flex flex-col justify-between mt-4 md:mt-0 gap-10 md:gap-12 text-[15px] md:text-base text-center md:text-left md:pl-4 opacity-90 font-medium tracking-tight">
-            <div className="flex flex-col gap-4">
-              <a className="underline decoration-1 underline-offset-4 hover:opacity-60 transition-opacity cursor-pointer">Have a project? Let's discuss</a>
-              <a className="underline decoration-1 underline-offset-4 hover:opacity-60 transition-opacity cursor-pointer">Join our team</a>
-            </div>
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-12 md:gap-8">
             
-            <div className="flex flex-col gap-2">
-              <a className="flex justify-center md:justify-start items-center gap-1.5 hover:opacity-60 transition-opacity cursor-pointer">
-                <ArrowUpRight className="w-4 h-4"/> Instagram
-              </a>
-              <a className="flex justify-center md:justify-start items-center gap-1.5 hover:opacity-60 transition-opacity cursor-pointer">
-                <ArrowUpRight className="w-4 h-4"/> LinkedIn
-              </a>
+            {/* Brand & Newsletter Column */}
+            <div className="md:col-span-2 lg:col-span-2 flex flex-col gap-8">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center font-heading italic text-background text-sm">
+                  C
+                </div>
+                <span className="font-heading italic text-lg tracking-tight">CareDose AI®</span>
+              </div>
+              
+              <div>
+                <h3 className="text-2xl font-heading leading-tight mb-4 tracking-tight">
+                  Stay updated with our<br/>latest clinical insights.
+                </h3>
+                <div className="border-b border-foreground/20 pb-2 flex justify-between items-center group cursor-pointer w-full max-w-xs transition-colors hover:border-foreground/40">
+                  <span className="text-sm opacity-60">Email address</span>
+                  <ArrowUpRight className="w-4 h-4 opacity-40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-1 mt-auto text-sm opacity-80">
-              <p>Privacy Policy</p>
-              <p>©2026 CareDose AI</p>
+            {/* Quick Links */}
+            <div className="flex flex-col gap-4">
+              <h4 className="text-[10px] uppercase font-bold tracking-[0.2em] opacity-40">Platform</h4>
+              <nav className="flex flex-col gap-2.5 text-sm font-medium">
+                <Link to="/" className="opacity-60 hover:opacity-100 transition-opacity">Overview</Link>
+                <Link to="/features" className="opacity-60 hover:opacity-100 transition-opacity">Features</Link>
+                <Link to="/pricing" className="opacity-60 hover:opacity-100 transition-opacity">Pricing</Link>
+                <Link to="/contact" className="opacity-60 hover:opacity-100 transition-opacity">Information</Link>
+              </nav>
             </div>
+
+            {/* Support & Legal */}
+            <div className="flex flex-col gap-4">
+              <h4 className="text-[10px] uppercase font-bold tracking-[0.2em] opacity-40">Support</h4>
+              <nav className="flex flex-col gap-2.5 text-sm font-medium">
+                <a className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer">Help Center</a>
+                <a className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer">API Docs</a>
+                <a className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer">Privacy Policy</a>
+                <a className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer">Terms of Use</a>
+              </nav>
+            </div>
+
+            {/* Social & Contact */}
+            <div className="flex flex-col gap-4">
+              <h4 className="text-[10px] uppercase font-bold tracking-[0.2em] opacity-40">Connect</h4>
+              <div className="flex flex-col gap-2.5 text-sm font-medium">
+                <a href="mailto:contact@curedose.com" className="opacity-60 hover:opacity-100 transition-opacity">contact@curedose.com</a>
+                <div className="flex gap-4 mt-2">
+                  <a className="w-8 h-8 rounded-full border border-foreground/10 flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-foreground/5 transition-all cursor-pointer">
+                    <ArrowUpRight className="w-3.5 h-3.5 rotate-45" />
+                  </a>
+                  <a className="w-8 h-8 rounded-full border border-foreground/10 flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-foreground/5 transition-all cursor-pointer">
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="mt-20 pt-8 border-t border-foreground/[0.05] flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold tracking-widest opacity-30">
+            <p>©2026 CareDose AI. All rights reserved.</p>
+            <p>Made with care for families everywhere.</p>
           </div>
         </div>
 
-        {/* Huge Bottom Text */}
-        <div className="w-full mt-12 md:mt-auto mb-[-4%] md:mb-[-3%] overflow-hidden flex justify-center z-0 pointer-events-none select-none opacity-20">
-          <h1 className="text-[20vw] leading-[0.7] font-heading tracking-[-0.05em] text-foreground whitespace-nowrap blur-[2px]">
+        {/* Scaled Down Branding Background */}
+        <div className="absolute bottom-[-2%] left-0 right-0 overflow-hidden flex justify-center z-0 pointer-events-none select-none opacity-[0.03]">
+          <h1 className="text-[15vw] leading-[0.7] font-heading tracking-[-0.05em] text-foreground whitespace-nowrap">
             CareDose
           </h1>
         </div>
 
-        {/* Circular Animation Badge */}
-        <div className="absolute bottom-6 right-6 md:bottom-12 md:right-12 w-28 h-28 md:w-36 md:h-36 flex items-center justify-center z-20 cursor-pointer group">
-          <div className="absolute w-full h-full rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite] liquid-glass-strong">
-            <svg viewBox="0 0 100 100" className="w-full h-full text-foreground opacity-90 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
+        {/* Circular Animation Badge - More Integrated */}
+        <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12 w-24 h-24 md:w-32 md:h-32 flex items-center justify-center z-20 cursor-pointer group">
+          <div className="absolute w-full h-full rounded-full flex items-center justify-center animate-[spin_12s_linear_infinite] hover:pause-animation">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-foreground opacity-20 group-hover:opacity-40 transition-opacity">
               <path id="badgePath" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="transparent" />
-              <text fontSize="14" fontWeight="600" letterSpacing="4.5" fill="currentColor">
+              <text fontSize="12" fontWeight="600" letterSpacing="4.2" fill="currentColor">
                 <textPath href="#badgePath" startOffset="0%">
                   CAREDOSE AI ® EST 2026 
                 </textPath>
               </text>
             </svg>
           </div>
-          <div className="w-4 h-4 md:w-6 md:h-6 bg-foreground rounded-full group-hover:scale-125 transition-transform duration-300 shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10"></div>
+          <div className="w-3 h-3 md:w-4 md:h-4 bg-foreground/10 rounded-full group-hover:bg-foreground/20 transition-all duration-500"></div>
         </div>
       </footer>
     </>

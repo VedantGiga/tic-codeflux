@@ -17,10 +17,10 @@ export default function WaterWaves() {
           />
         </defs>
         <g className="parallax-waves">
-          <use xlinkHref="#wave" x="48" y="0" fill="rgba(255,255,255,0.03)" />
-          <use xlinkHref="#wave" x="48" y="3" fill="rgba(255,255,255,0.02)" />
-          <use xlinkHref="#wave" x="48" y="5" fill="rgba(255,255,255,0.015)" />
-          <use xlinkHref="#wave" x="48" y="7" fill="rgba(255,255,255,0.01)" />
+          <use xlinkHref="#wave" x="48" y="0" fill="currentColor" opacity="0.06" />
+          <use xlinkHref="#wave" x="48" y="3" fill="currentColor" opacity="0.04" />
+          <use xlinkHref="#wave" x="48" y="5" fill="currentColor" opacity="0.03" />
+          <use xlinkHref="#wave" x="48" y="7" fill="currentColor" opacity="0.02" />
         </g>
       </svg>
     </div>

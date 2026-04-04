@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { ArrowUpRight, Menu, X, Plus, Scan } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ThemeToggle } from "./ThemeToggle";
 
 const Navbar = () => {
   const location = useLocation();
@@ -10,7 +9,6 @@ const Navbar = () => {
 
   const navLinks = [
     { label: "Home", to: "/" },
-    { label: "Dashboard", to: "/dashboard" },
     { label: "Features", to: "/features" },
     { label: "How It Works", to: "/how-it-works" },
     { label: "Pricing", to: "/pricing" },
@@ -42,21 +40,6 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="w-px h-6 bg-border mx-2"></div>
-              
-              {/* Dashboard Quick Actions */}
-              <div className="flex items-center gap-1">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-colors">
-                  <Plus className="w-3.5 h-3.5" />
-                  Add Med
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-colors">
-                  <Scan className="w-3.5 h-3.5" />
-                  Scan RX
-                </button>
-              </div>
-
-              <div className="w-px h-6 bg-border mx-2"></div>
-              <ThemeToggle />
               <Link
                 to="/contact"
                 className="bg-foreground text-background rounded-full px-4 py-2 text-sm font-medium font-body flex items-center gap-1.5 hover:bg-foreground/90 transition-colors ml-2 shadow-sm"
@@ -70,7 +53,6 @@ const Navbar = () => {
 
           {/* Mobile right side */}
           <div className="flex lg:hidden flex-1 justify-end items-center gap-2">
-            <ThemeToggle />
             <Link
               to="/contact"
               className="bg-foreground text-background rounded-full px-4 py-2 text-xs font-medium font-body flex items-center gap-1 hover:bg-foreground/90 transition-colors"
@@ -114,15 +96,6 @@ const Navbar = () => {
             ))}
             
             <div className="h-px bg-border my-2 mx-4" />
-            
-            <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-foreground font-medium hover:bg-foreground/5 transition-colors">
-              <Plus className="w-4 h-4" />
-              Add Med
-            </button>
-            <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-foreground font-medium hover:bg-foreground/5 transition-colors">
-              <Scan className="w-4 h-4" />
-              Scan RX
-            </button>
           </motion.div>
         )}
       </AnimatePresence>
