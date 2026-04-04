@@ -206,7 +206,7 @@ async function checkAndFireRetries(): Promise<void> {
     }
   } catch (error: any) {
     if (error.code === 9) {
-       logger.error("Firestore Index missing for pending_retry query (status: ASC, retryAt: ASC).");
+       logger.error({ error: error.message }, "Firestore Index missing for pending_retry query (status: ASC, retryAt: ASC). Please click the link above to create it.");
     } else {
        logger.error({ error }, "Error checking retries in Firestore");
     }

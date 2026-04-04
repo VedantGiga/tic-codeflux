@@ -93,16 +93,8 @@ const styles = StyleSheet.create({
   wrapper: {
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 4,
   },
   wrapperElevated: {
-    shadowOpacity: 0.35,
-    shadowRadius: 32,
-    elevation: 8,
   },
   blur: {
     overflow: "hidden",
