@@ -9,6 +9,8 @@ export interface User {
   name: string;
   email: string;
   photoURL?: string;
+  smsEnabled?: boolean;
+  smsNumber?: string | null;
   createdAt?: string;
 }
 
@@ -19,6 +21,7 @@ interface AuthState {
   firebaseReady: boolean;
   setAuth: (user: User, token?: string | null) => void;
   setFirebaseReady: () => void;
+  updateUserSettings: (settings: Partial<User>) => void;
   logout: () => void;
 }
 
@@ -31,6 +34,9 @@ export const useAuthStore = create<AuthState>()(
       firebaseReady: false,
       setAuth: (user, token = null) => set({ user, token, isAuthenticated: true }),
       setFirebaseReady: () => set({ firebaseReady: true }),
+      updateUserSettings: (settings) => set((state) => ({ 
+        user: state.user ? { ...state.user, ...settings } : null 
+      })),
       logout: () => {
         signOut(auth);
         set({ token: null, user: null, isAuthenticated: false });

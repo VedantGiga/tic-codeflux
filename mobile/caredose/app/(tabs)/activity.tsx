@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
 import { usePatientStore } from "@/store/patientStore";
+import { useAuthStore } from "@/store/authStore";
 import { patientsApi } from "@/lib/api";
 import ScreenBackground from "@/components/ScreenBackground";
 import type { ActivityLog } from "@/lib/api";
@@ -100,12 +101,14 @@ function LogItem({ log }: { log: ActivityLog }) {
 export default function ActivityScreen() {
   const insets = useSafeAreaInsets();
   const { selectedPatientId } = usePatientStore();
+  const { firebaseReady } = useAuthStore();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const { data: patients = [] } = useQuery({
     queryKey: ["patients"],
     queryFn: patientsApi.getAll,
+    enabled: firebaseReady,
   });
 
   const activePatientId = selectedPatientId ?? patients[0]?.id;
@@ -113,7 +116,7 @@ export default function ActivityScreen() {
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ["logs", activePatientId],
     queryFn: () => patientsApi.logs(activePatientId!),
-    enabled: !!activePatientId,
+    enabled: !!activePatientId && firebaseReady,
   });
 
   const activePatient = patients.find((p) => p.id === activePatientId);

@@ -35,9 +35,14 @@ async function apiFetch<T>(
     if (currentUser) {
       const token = await currentUser.getIdToken();
       headers["Authorization"] = `Bearer ${token}`;
+    } else {
+      // Fallback to stored token if Firebase is not yet ready
+      const storedToken = useAuthStore.getState().token;
+      if (storedToken) {
+        headers["Authorization"] = `Bearer ${storedToken}`;
+      }
     }
   } catch (e) {
-    // Fallback to stored token if Firebase isn't available
     const storedToken = useAuthStore.getState().token;
     if (storedToken) {
       headers["Authorization"] = `Bearer ${storedToken}`;
@@ -86,6 +91,8 @@ export interface AuthResponse {
     id: string;
     name: string;
     email: string;
+    smsEnabled: boolean;
+    smsNumber: string | null;
     createdAt: string;
   };
 }
@@ -163,7 +170,10 @@ export const authApi = {
     api.post<AuthResponse>("/auth/register", { name, email, password }),
   login: (email: string, password: string) =>
     api.post<AuthResponse>("/auth/login", { email, password }),
-  me: () => api.get<{ id: string; name: string; email: string; createdAt: string }>("/auth/me"),
+  me: () => api.get<{ id: string; name: string; email: string; smsEnabled: boolean; smsNumber: string | null; createdAt: string }>("/auth/me"),
+  sendOtp: (phone: string) => api.post<{ message: string }>("/auth/sms/send-otp", { phone }),
+  verifyOtp: (phone: string, otp: string) => api.post<{ message: string }>("/auth/sms/verify-otp", { phone, otp }),
+  toggleSms: (enabled: boolean) => api.post<{ message: string }>("/auth/sms/toggle", { enabled }),
 };
 
 export const patientsApi = {

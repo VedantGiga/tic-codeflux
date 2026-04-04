@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { adminDb } from "../lib/firebase-admin.js";
-import { getCallInfo, removeCallInfo } from "../services/twilio.service.js";
+import { getCallInfo, removeCallInfo, sendSms } from "../services/twilio.service.js";
 import { logger } from "../lib/logger.js";
 
 const LOGS_COLLECTION = "activity_logs";
+const PATIENTS_COLLECTION = "patients";
+const USERS_COLLECTION = "users";
 
 export async function handleVoiceWebhook(req: Request, res: Response): Promise<void> {
   try {
@@ -14,19 +16,44 @@ export async function handleVoiceWebhook(req: Request, res: Response): Promise<v
     const callInfo = CallSid ? getCallInfo(CallSid) : null;
 
     if (callInfo && Digits) {
-      const status = Digits === "1" ? "taken" : "missed";
+      const isTaken = Digits === "1";
+      
+      const logRef = adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId);
+      const logDoc = await logRef.get();
+      const logData = logDoc.data();
+      const retryCount = logData?.retryCount ?? 0;
 
-      await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
-        status,
-        source: "call",
-        respondedAt: new Date().toISOString(),
-      });
-
-      logger.info({ logId: callInfo.logId, status }, "Medicine status updated via call");
+      if (isTaken) {
+        await logRef.update({
+          status: "taken",
+          source: "call",
+          respondedAt: new Date().toISOString(),
+        });
+        logger.info({ logId: callInfo.logId }, "Medicine status updated to taken");
+      } else {
+        if (retryCount === 0) {
+          await logRef.update({
+            status: "pending_retry",
+            retryCount: 1,
+            retryAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+            source: "call",
+            respondedAt: new Date().toISOString(),
+          });
+          logger.info({ logId: callInfo.logId }, "Call missed (1st try) - slated for retry");
+        } else {
+          await logRef.update({
+            status: "missed",
+            source: "call",
+            respondedAt: new Date().toISOString(),
+          });
+          logger.info({ logId: callInfo.logId }, "Call missed (2nd try) - marking missed entirely");
+          await triggerEmergencySms(callInfo.patientId, logData?.medicineName || "Unknown Medicine");
+        }
+      }
 
       const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="alice">${status === "taken" ? "Thank you. Your medicine has been marked as taken. Stay healthy!" : "Understood. Please take your medicine as soon as possible. Goodbye."}</Say>
+  <Say voice="alice">${isTaken ? "Thank you. Your medicine has been marked as taken. Stay healthy!" : "Understood. Please take your medicine as soon as possible. Goodbye."}</Say>
   <Hangup/>
 </Response>`;
 
@@ -61,10 +88,28 @@ export async function handleStatusWebhook(req: Request, res: Response): Promise<
 
     if (CallSid && (CallStatus === "completed" || CallStatus === "failed" || CallStatus === "no-answer")) {
       const callInfo = getCallInfo(CallSid);
-      if (callInfo && CallStatus === "no-answer") {
-        await adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId).update({
-          status: "no_response",
-        });
+      if (callInfo && (CallStatus === "no-answer" || CallStatus === "failed")) {
+        const logRef = adminDb.collection(LOGS_COLLECTION).doc(callInfo.logId);
+        const logDoc = await logRef.get();
+        const logData = logDoc.data();
+        const retryCount = logData?.retryCount ?? 0;
+
+        if (retryCount === 0) {
+          await logRef.update({
+            status: "pending_retry",
+            retryCount: 1,
+            retryAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+            source: "call",
+            respondedAt: new Date().toISOString(),
+          });
+        } else {
+          await logRef.update({
+            status: "no_response",
+            source: "call",
+            respondedAt: new Date().toISOString(),
+          });
+          await triggerEmergencySms(callInfo.patientId, logData?.medicineName || "Unknown Medicine");
+        }
       }
       if (CallSid) removeCallInfo(CallSid);
     }
@@ -73,5 +118,25 @@ export async function handleStatusWebhook(req: Request, res: Response): Promise<
   } catch (error) {
     logger.error({ error }, "Error in handleStatusWebhook");
     res.status(500).send("Internal Server Error");
+  }
+}
+
+async function triggerEmergencySms(patientId: string, medicineName: string): Promise<void> {
+  try {
+    const patientDoc = await adminDb.collection(PATIENTS_COLLECTION).doc(patientId).get();
+    if (!patientDoc.exists) return;
+    const patient = patientDoc.data()!;
+
+    const userDoc = await adminDb.collection(USERS_COLLECTION).doc(patient.userId).get();
+    if (!userDoc.exists) return;
+    const user = userDoc.data()!;
+
+    if (user.smsEnabled && user.smsNumber) {
+      const msg = `URGENT: CareDose AI Alert - ${patient.name} did not confirm taking their ${medicineName} dose after 2 reminders. Please check on them.`;
+      await sendSms(user.smsNumber, msg);
+      logger.info({ userId: patient.userId, smsNumber: user.smsNumber, patient: patient.name }, "Emergency SMS sent to caregiver");
+    }
+  } catch (err) {
+    logger.error({ err, patientId }, "Failed to trigger emergency SMS");
   }
 }
