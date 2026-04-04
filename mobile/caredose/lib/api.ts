@@ -1,4 +1,5 @@
 import { useAuthStore } from "../store/authStore";
+import { auth } from "./firebase";
 
 const getBaseUrl = (): string => {
   const apiUrl = process.env["EXPO_PUBLIC_API_URL"];
@@ -23,13 +24,24 @@ async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = useAuthStore.getState().token;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+
+  // Get fresh Firebase token (auto-refreshes if expired)
+  try {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const token = await currentUser.getIdToken();
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  } catch (e) {
+    // Fallback to stored token if Firebase isn't available
+    const storedToken = useAuthStore.getState().token;
+    if (storedToken) {
+      headers["Authorization"] = `Bearer ${storedToken}`;
+    }
   }
 
   try {

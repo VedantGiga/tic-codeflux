@@ -39,23 +39,36 @@ function RootLayoutNav() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const setAuth = useAuthStore((s) => s.setAuth);
   const logout = useAuthStore((s) => s.logout);
+  const setFirebaseReady = useAuthStore((s) => s.setFirebaseReady);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setAuth({
-          id: user.uid,
-          name: user.displayName || "User",
-          email: user.email || "",
-          photoURL: user.photoURL || undefined,
-        });
+        // Get fresh token and store it alongside user info
+        try {
+          const token = await user.getIdToken();
+          setAuth({
+            id: user.uid,
+            name: user.displayName || "User",
+            email: user.email || "",
+            photoURL: user.photoURL || undefined,
+          }, token);
+        } catch (e) {
+          setAuth({
+            id: user.uid,
+            name: user.displayName || "User",
+            email: user.email || "",
+            photoURL: user.photoURL || undefined,
+          });
+        }
       } else {
         logout();
       }
+      setFirebaseReady();
     });
 
     return () => unsubscribe();
-  }, [setAuth, logout]);
+  }, [setAuth, logout, setFirebaseReady]);
 
   return (
     <Stack
@@ -65,6 +78,8 @@ function RootLayoutNav() {
         animation: "fade",
       }}
     >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="language" />
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="auth/login" />
       <Stack.Screen name="auth/register" />

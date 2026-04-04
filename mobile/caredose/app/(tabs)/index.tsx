@@ -74,6 +74,7 @@ export default function DashboardScreen() {
   const { selectedPatientId, setSelectedPatient } = usePatientStore();
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const firebaseReady = useAuthStore((s) => s.firebaseReady);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -81,6 +82,7 @@ export default function DashboardScreen() {
   const { data: patients = [], isLoading: patientsLoading } = useQuery({
     queryKey: ["patients"],
     queryFn: patientsApi.getAll,
+    enabled: firebaseReady,
   });
 
   React.useEffect(() => {

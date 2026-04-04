@@ -16,7 +16,9 @@ interface AuthState {
   token: string | null;
   user: User | null;
   isAuthenticated: boolean;
+  firebaseReady: boolean;
   setAuth: (user: User, token?: string | null) => void;
+  setFirebaseReady: () => void;
   logout: () => void;
 }
 
@@ -26,7 +28,9 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
       isAuthenticated: false,
+      firebaseReady: false,
       setAuth: (user, token = null) => set({ user, token, isAuthenticated: true }),
+      setFirebaseReady: () => set({ firebaseReady: true }),
       logout: () => {
         signOut(auth);
         set({ token: null, user: null, isAuthenticated: false });
