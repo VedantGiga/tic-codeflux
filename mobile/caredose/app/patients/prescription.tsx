@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
   Image,
+  TextInput,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,19 +17,54 @@ import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import * as FileSystem from "expo-file-system";
+import { useQuery } from "@tanstack/react-query";
 import { Colors } from "@/constants/colors";
-import { aiApi } from "@/lib/api";
-import type { ExtractedMedicine } from "@/lib/api";
+import { aiApi, medicinesApi, patientsApi } from "@/lib/api";
+import type { AIExtractedMedicine, Patient } from "@/lib/api";
+import { usePatientStore } from "@/store/patientStore";
+import PatientAvatar from "@/components/PatientAvatar";
 
 export default function PrescriptionScannerScreen() {
   const insets = useSafeAreaInsets();
+  const { selectedPatientId, setSelectedPatient } = usePatientStore();
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [medicines, setMedicines] = useState<ExtractedMedicine[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [medicines, setMedicines] = useState<AIExtractedMedicine[]>([]);
   const [rawText, setRawText] = useState("");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+
+  // Fetch patients to allow selection if none is selected
+  const { data: patients = [] } = useQuery({
+    queryKey: ["patients"],
+    queryFn: patientsApi.getAll,
+  });
+
+  const selectedPatient = patients.find(p => p.id === selectedPatientId);
+  const [patientNumber, setPatientNumber] = useState("");
+  const [searchingPatient, setSearchingPatient] = useState(false);
+
+  // Auto-lookup patient by number
+  useEffect(() => {
+    if (patientNumber.length === 6) {
+      handlePatientLookup(patientNumber);
+    }
+  }, [patientNumber]);
+
+  const handlePatientLookup = async (num: string) => {
+    setSearchingPatient(true);
+    try {
+      const patient = await patientsApi.getByNumber(num);
+      setSelectedPatient(patient.id);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (err) {
+      // Not found or error
+    } finally {
+      setSearchingPatient(false);
+    }
+  };
 
   const pickImage = async (useCamera: boolean) => {
     if (Platform.OS !== "web") {
@@ -54,7 +90,7 @@ export default function PrescriptionScannerScreen() {
       let base64 = asset.base64;
       if (!base64 && asset.uri && Platform.OS !== "web") {
         base64 = await FileSystem.readAsStringAsync(asset.uri, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: "base64",
         });
       }
 
@@ -69,8 +105,9 @@ export default function PrescriptionScannerScreen() {
         setMedicines(result2.medicines);
         setRawText(result2.rawText);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } catch (err: unknown) {
-        Alert.alert("Error", err instanceof Error ? err.message : "Failed to parse prescription");
+      } catch (err: any) {
+        const errorMsg = err?.message || "Failed to parse prescription";
+        Alert.alert("Scan Error", errorMsg);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } finally {
         setLoading(false);
@@ -78,11 +115,29 @@ export default function PrescriptionScannerScreen() {
     }
   };
 
-  const addMedicineToSchedule = (med: ExtractedMedicine) => {
-    router.push({
-      pathname: "/patients/add-medicine",
-      params: { prefillName: med.name, prefillDosage: med.dosage },
-    });
+  const saveAllToPatient = async () => {
+    if (!selectedPatientId) {
+      Alert.alert("Error", "Please select a patient first.");
+      return;
+    }
+
+    if (medicines.length === 0) {
+      Alert.alert("Error", "No medicines found to save.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await medicinesApi.createBatch(selectedPatientId, medicines);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Success", "All medicines have been added to the patient's schedule.");
+      router.push("/(tabs)"); // Go to home/dashboard
+    } catch (err: unknown) {
+      Alert.alert("Error", err instanceof Error ? err.message : "Failed to save medicines");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -90,7 +145,7 @@ export default function PrescriptionScannerScreen() {
       style={styles.container}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: topPad + 16, paddingBottom: bottomPad + 24 },
+        { paddingTop: topPad + 16, paddingBottom: bottomPad + 40 },
       ]}
       showsVerticalScrollIndicator={false}
     >
@@ -98,19 +153,63 @@ export default function PrescriptionScannerScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={Colors.text} />
         </TouchableOpacity>
-        <Text style={styles.navTitle}>Scan Prescription</Text>
+        <Text style={styles.navTitle}>Scan & Schedule</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <View style={styles.heroSection}>
-        <View style={styles.heroIcon}>
-          <Feather name="camera" size={32} color={Colors.secondary} />
+      {/* Missing API Key Warning */}
+      {rawText.includes("OPENAI_API_KEY") && (
+        <View style={styles.apiWarning}>
+          <Feather name="info" size={16} color={Colors.warning} />
+          <Text style={styles.apiWarningText}>
+            Demo Mode: OpenAI API Key missing in backend .env file.
+          </Text>
         </View>
-        <Text style={styles.heroTitle}>AI Prescription Scanner</Text>
-        <Text style={styles.heroSubtitle}>
-          Upload or take a photo of any prescription and our AI will automatically extract medicines, dosages, and schedules.
-        </Text>
+      )}
+
+      {/* Patient Linking Segment */}
+      <View style={styles.patientSelector}>
+        <Text style={styles.sectionLabel}>1. Link Patient (Type 6-digit ID)</Text>
+        <View style={styles.patientInputContainer}>
+          <Feather name="user" size={18} color={Colors.textTertiary} style={styles.inputIcon} />
+          <TextInput
+            style={styles.patientInput}
+            placeholder="Enter Patient ID (e.g. 100201)"
+            placeholderTextColor={Colors.textTertiary}
+            value={patientNumber}
+            onChangeText={setPatientNumber}
+            keyboardType="number-pad"
+            maxLength={6}
+          />
+          {searchingPatient && <ActivityIndicator size="small" color={Colors.primary} />}
+        </View>
+
+        {selectedPatient && (
+          <View style={styles.selectedPatientBanner}>
+            <PatientAvatar name={selectedPatient.name} size={24} fontSize={10} />
+            <Text style={styles.selectedPatientBannerText}>
+              Linked to: <Text style={{ fontFamily: "DMSans_700Bold" }}>{selectedPatient.name}</Text>
+            </Text>
+            <TouchableOpacity onPress={() => { setSelectedPatient(null); setPatientNumber(""); }}>
+              <Feather name="x-circle" size={16} color={Colors.textTertiary} />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
+
+      <Text style={styles.sectionLabel}>2. Scan Prescription</Text>
+
+      {!image ? (
+        <View style={styles.heroSection}>
+          <View style={styles.heroIcon}>
+            <Feather name="camera" size={32} color={Colors.secondary} />
+          </View>
+          <Text style={styles.heroTitle}>AI Prescription Scanner</Text>
+          <Text style={styles.heroSubtitle}>
+            Upload or take a photo of any prescription and our AI will automatically extract medicines, dosages, and schedules.
+          </Text>
+        </View>
+      ) : null}
 
       {!image ? (
         <View style={styles.uploadSection}>
@@ -175,23 +274,37 @@ export default function PrescriptionScannerScreen() {
               <View style={styles.medicineResultInfo}>
                 <Text style={styles.medicineResultName}>{med.name}</Text>
                 <Text style={styles.medicineResultDosage}>{med.dosage}</Text>
-                {med.frequency && (
-                  <Text style={styles.medicineResultFreq}>{med.frequency}</Text>
-                )}
-                {med.time && (
-                  <Text style={styles.medicineResultTime}>Time: {med.time}</Text>
-                )}
+                <View style={styles.medicineResultBadgeContainer}>
+                  <View style={[styles.freqBadge, { backgroundColor: "rgba(129, 140, 248, 0.12)" }]}>
+                    <Text style={[styles.freqBadgeText, { color: Colors.secondary }]}>{med.frequency}</Text>
+                  </View>
+                  {med.times?.map((t, tidx) => (
+                    <View key={tidx} style={styles.timeBadge}>
+                      <Text style={styles.timeBadgeText}>{t.hour?.toString().padStart(2, '0')}:{t.minute?.toString().padStart(2, '0')}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-              <TouchableOpacity
-                style={styles.addToScheduleBtn}
-                onPress={() => addMedicineToSchedule(med)}
-                activeOpacity={0.8}
-              >
-                <Feather name="plus" size={14} color={Colors.background} />
-                <Text style={styles.addToScheduleBtnText}>Add</Text>
-              </TouchableOpacity>
             </View>
           ))}
+
+          <TouchableOpacity
+            style={[
+              styles.saveAllBtn,
+              (!selectedPatientId || saving) && styles.saveAllBtnDisabled
+            ]}
+            onPress={saveAllToPatient}
+            disabled={!selectedPatientId || saving}
+          >
+            {saving ? (
+              <ActivityIndicator color={Colors.background} size="small" />
+            ) : (
+              <>
+                <Feather name="check" size={18} color={Colors.background} />
+                <Text style={styles.saveAllBtnText}>Confirm & Save All to {selectedPatient?.name || "Patient"}</Text>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
       )}
 
@@ -215,10 +328,129 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 20,
   },
   backBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
   navTitle: { fontSize: 17, fontFamily: "DMSans_600SemiBold", color: Colors.text },
+  
+  apiWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(245, 158, 11, 0.1)",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 20,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "rgba(245, 158, 11, 0.2)",
+  },
+  apiWarningText: {
+    fontSize: 13,
+    fontFamily: "DMSans_500Medium",
+    color: "#B45309",
+    flex: 1,
+  },
+
+  patientSelector: {
+    marginBottom: 24,
+  },
+  patientInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.glass.background,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
+    borderWidth: 1,
+    borderColor: Colors.glass.border,
+    marginBottom: 12,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  patientInput: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: "DMSans_500Medium",
+    color: Colors.text,
+  },
+  selectedPatientBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    padding: 12,
+    borderRadius: 12,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.2)",
+  },
+  selectedPatientBannerText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: "DMSans_500Medium",
+    color: Colors.taken,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontFamily: "DMSans_700Bold",
+    color: Colors.textTertiary,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  selectedPatientCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.glass.background,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.glass.border,
+  },
+  selectedPatientInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  selectedPatientName: {
+    fontSize: 15,
+    fontFamily: "DMSans_600SemiBold",
+    color: Colors.text,
+  },
+  selectedPatientMeta: {
+    fontSize: 11,
+    fontFamily: "DMSans_400Regular",
+    color: Colors.textTertiary,
+  },
+  changePatientBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 8,
+  },
+  changePatientText: {
+    fontSize: 12,
+    fontFamily: "DMSans_600SemiBold",
+    color: Colors.primary,
+  },
+  selectPatientPlaceholder: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.glass.background,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: Colors.primary,
+    gap: 12,
+  },
+  selectPatientText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: "DMSans_500Medium",
+    color: Colors.primary,
+  },
+
   heroSection: {
     alignItems: "center",
     marginBottom: 28,
@@ -342,8 +574,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.glass.background,
     borderRadius: 16,
     padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
     marginBottom: 10,
     borderWidth: 1,
     borderColor: Colors.glass.border,
@@ -359,33 +589,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "DMSans_400Regular",
     color: Colors.textSecondary,
+    marginBottom: 8,
   },
-  medicineResultFreq: {
-    fontSize: 13,
-    fontFamily: "DMSans_400Regular",
-    color: Colors.textTertiary,
-    marginTop: 2,
-    textTransform: "capitalize",
-  },
-  medicineResultTime: {
-    fontSize: 13,
-    fontFamily: "DMSans_400Regular",
-    color: Colors.textTertiary,
-  },
-  addToScheduleBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  medicineResultBadgeContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     gap: 6,
   },
-  addToScheduleBtnText: {
-    fontSize: 14,
-    fontFamily: "DMSans_600SemiBold",
+  freqBadge: {
+    backgroundColor: "rgba(129, 140, 248, 0.12)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  freqBadgeText: {
+    fontSize: 11,
+    fontFamily: "DMSans_700Bold",
+    color: Colors.secondary,
+    textTransform: "uppercase",
+  },
+  timeBadge: {
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  timeBadgeText: {
+    fontSize: 11,
+    fontFamily: "DMSans_700Bold",
+    color: Colors.primary,
+  },
+
+  saveAllBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    paddingVertical: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 16,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveAllBtnDisabled: {
+    backgroundColor: Colors.textTertiary,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  saveAllBtnText: {
+    fontSize: 16,
+    fontFamily: "DMSans_700Bold",
     color: Colors.background,
   },
+
   noResultsSection: {
     alignItems: "center",
     paddingVertical: 24,
