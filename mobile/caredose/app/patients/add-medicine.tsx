@@ -45,15 +45,24 @@ function formatHour(hour: number, minute: number): string {
 export default function AddMedicineScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const params = useLocalSearchParams<{ prefillName?: string; prefillDosage?: string }>();
+  const params = useLocalSearchParams<{
+    prefillName?: string;
+    prefillDosage?: string;
+    prefillFrequency?: string;
+    prefillTimes?: string;
+    medicineId?: string;
+  }>();
   const { selectedPatientId } = usePatientStore();
+  const isEditMode = !!params.medicineId;
 
   const [name, setName] = useState(params.prefillName ?? "");
   const [dosage, setDosage] = useState(params.prefillDosage ?? "");
-  const [frequency, setFrequency] = useState("daily");
-  const [selectedTimes, setSelectedTimes] = useState<MedicineTime[]>([
-    { hour: 8, minute: 0, label: "Morning" },
-  ]);
+  const [frequency, setFrequency] = useState(params.prefillFrequency ?? "daily");
+  const [selectedTimes, setSelectedTimes] = useState<MedicineTime[]>(
+    params.prefillTimes
+      ? (JSON.parse(params.prefillTimes) as MedicineTime[])
+      : [{ hour: 8, minute: 0, label: "Morning" }],
+  );
   const [showPicker, setShowPicker] = useState(false);
   const [tempTime, setTempTime] = useState(new Date());
   const [startDate] = useState(new Date().toISOString().split("T")[0]!);
@@ -70,7 +79,7 @@ export default function AddMedicineScreen() {
   const activePatientId = selectedPatientId ?? patients[0]?.id;
   const activePatient = patients.find((p) => p.id === activePatientId);
 
-  const { mutate: createMedicine, isPending } = useMutation({
+  const { mutate: createMedicine, isPending: isCreating } = useMutation({
     mutationFn: (data: Parameters<typeof medicinesApi.create>[1]) =>
       medicinesApi.create(activePatientId!, data),
     onSuccess: () => {
@@ -86,6 +95,24 @@ export default function AddMedicineScreen() {
       Alert.alert("Error", err.message);
     },
   });
+
+  const { mutate: updateMedicine, isPending: isUpdating } = useMutation({
+    mutationFn: (data: Parameters<typeof medicinesApi.update>[2]) =>
+      medicinesApi.update(activePatientId!, params.medicineId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicines", activePatientId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", activePatientId] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Medicine Updated", `${name} has been updated successfully!`, [
+        { text: "Done", onPress: () => router.back() },
+      ]);
+    },
+    onError: (err: Error) => {
+      Alert.alert("Error", err.message);
+    },
+  });
+
+  const isPending = isCreating || isUpdating;
 
   const toggleTimePreset = (preset: (typeof TIME_PRESETS)[0]) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -141,13 +168,18 @@ export default function AddMedicineScreen() {
 
   const handleSubmit = () => {
     if (!validate()) return;
-    createMedicine({
+    const payload = {
       name: name.trim(),
       dosage: dosage.trim(),
       frequency,
       times: selectedTimes,
       startDate,
-    });
+    };
+    if (isEditMode) {
+      updateMedicine(payload);
+    } else {
+      createMedicine(payload);
+    }
   };
 
   return (
@@ -168,7 +200,7 @@ export default function AddMedicineScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Feather name="arrow-left" size={22} color={Colors.text} />
           </TouchableOpacity>
-          <Text style={styles.navTitle}>Add Medicine</Text>
+          <Text style={styles.navTitle}>{isEditMode ? "Edit Medicine" : "Add Medicine"}</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -344,8 +376,8 @@ export default function AddMedicineScreen() {
             <ActivityIndicator color={Colors.background} />
           ) : (
             <>
-              <Feather name="plus-circle" size={18} color={Colors.background} />
-              <Text style={styles.buttonText}>Add Medicine</Text>
+              <Feather name={isEditMode ? "save" : "plus-circle"} size={18} color={Colors.background} />
+              <Text style={styles.buttonText}>{isEditMode ? "Save Changes" : "Add Medicine"}</Text>
             </>
           )}
         </TouchableOpacity>

@@ -9,7 +9,9 @@ import HowItWorksPage from "./pages/HowItWorks.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Contact from "./pages/Contact.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
 import CtaFooter from "@/components/CtaFooter";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 import { useEffect } from "react";
 import Lenis from "lenis";
@@ -33,24 +35,27 @@ const App = () => {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <CtaFooter />
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <CtaFooter />
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 };
 

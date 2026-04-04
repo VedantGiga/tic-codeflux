@@ -33,10 +33,12 @@ function MedicineCard({
   medicine,
   onDelete,
   onToggle,
+  onEdit,
 }: {
   medicine: Medicine;
   onDelete: () => void;
   onToggle: () => void;
+  onEdit: () => void;
 }) {
   return (
     <View style={[styles.medicineCard, !medicine.isActive && styles.medicineCardInactive]}>
@@ -67,6 +69,9 @@ function MedicineCard({
         </View>
       </View>
       <View style={styles.medicineCardActions}>
+        <TouchableOpacity style={styles.actionBtn} onPress={onEdit}>
+          <Feather name="edit-2" size={18} color={Colors.primary} />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={onToggle}>
           <Feather
             name={medicine.isActive ? "pause-circle" : "play-circle"}
@@ -139,6 +144,20 @@ export default function MedicinesScreen() {
     );
   };
 
+  const handleEdit = (medicine: Medicine) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push({
+      pathname: "/patients/add-medicine",
+      params: {
+        medicineId: medicine.id,
+        prefillName: medicine.name,
+        prefillDosage: medicine.dosage,
+        prefillFrequency: medicine.frequency,
+        prefillTimes: JSON.stringify(medicine.times),
+      },
+    });
+  };
+
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
@@ -188,6 +207,7 @@ export default function MedicinesScreen() {
             <MedicineCard
               medicine={item}
               onDelete={() => handleDelete(item)}
+              onEdit={() => handleEdit(item)}
               onToggle={() =>
                 toggleMutation.mutate({ medicineId: item.id, isActive: !item.isActive })
               }

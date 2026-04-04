@@ -11,7 +11,7 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
@@ -33,17 +33,28 @@ export default function AddPatientScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const setSelectedPatient = usePatientStore((s) => s.setSelectedPatient);
+  const params = useLocalSearchParams<{
+    patientId?: string;
+    prefillName?: string;
+    prefillAge?: string;
+    prefillPhone?: string;
+    prefillLanguage?: string;
+  }>();
+  const isEditMode = !!params.patientId;
 
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [phone, setPhone] = useState("");
-  const [language, setLanguage] = useState("english");
+  const [name, setName] = useState(params.prefillName ?? "");
+  const [age, setAge] = useState(params.prefillAge ?? "");
+  // Strip the +91 prefix for the input field
+  const [phone, setPhone] = useState(
+    params.prefillPhone ? params.prefillPhone.replace(/^\+91/, "") : ""
+  );
+  const [language, setLanguage] = useState(params.prefillLanguage ?? "english");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const { mutate: createPatient, isPending } = useMutation({
+  const { mutate: createPatient, isPending: isCreating } = useMutation({
     mutationFn: patientsApi.create,
     onSuccess: (patient) => {
       queryClient.invalidateQueries({ queryKey: ["patients"] });
@@ -57,6 +68,23 @@ export default function AddPatientScreen() {
       Alert.alert("Error", err.message);
     },
   });
+
+  const { mutate: updatePatient, isPending: isUpdating } = useMutation({
+    mutationFn: (data: Parameters<typeof patientsApi.update>[1]) =>
+      patientsApi.update(params.patientId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Patient Updated", `${name.trim()} has been updated successfully!`, [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    },
+    onError: (err: Error) => {
+      Alert.alert("Error", err.message);
+    },
+  });
+
+  const isPending = isCreating || isUpdating;
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -76,7 +104,11 @@ export default function AddPatientScreen() {
   const handleSubmit = () => {
     if (!validate()) return;
     const fullPhone = `+91${phone.trim().replace(/\s/g, "")}`;
-    createPatient({ name: name.trim(), age: parseInt(age, 10), phone: fullPhone, language });
+    if (isEditMode) {
+      updatePatient({ name: name.trim(), age: parseInt(age, 10), phone: fullPhone, language });
+    } else {
+      createPatient({ name: name.trim(), age: parseInt(age, 10), phone: fullPhone, language });
+    }
   };
 
   return (
@@ -97,16 +129,18 @@ export default function AddPatientScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Feather name="arrow-left" size={22} color={Colors.text} />
           </TouchableOpacity>
-          <Text style={styles.navTitle}>Add Patient</Text>
+          <Text style={styles.navTitle}>{isEditMode ? "Edit Patient" : "Add Patient"}</Text>
           <View style={{ width: 40 }} />
         </View>
 
         <View style={styles.iconSection}>
           <View style={styles.iconBg}>
-            <Feather name="user-plus" size={28} color={Colors.primary} />
+            <Feather name={isEditMode ? "edit-2" : "user-plus"} size={28} color={Colors.primary} />
           </View>
           <Text style={styles.pageSubtitle}>
-            Add a patient to manage their medicine schedule and receive AI call reminders.
+            {isEditMode
+              ? "Update this patient's details. Changes will apply to future reminders."
+              : "Add a patient to manage their medicine schedule and receive AI call reminders."}
           </Text>
         </View>
 
@@ -207,8 +241,8 @@ export default function AddPatientScreen() {
             <ActivityIndicator color={Colors.background} />
           ) : (
             <>
-              <Feather name="user-plus" size={18} color={Colors.background} />
-              <Text style={styles.buttonText}>Add Patient</Text>
+              <Feather name={isEditMode ? "save" : "user-plus"} size={18} color={Colors.background} />
+              <Text style={styles.buttonText}>{isEditMode ? "Save Changes" : "Add Patient"}</Text>
             </>
           )}
         </TouchableOpacity>

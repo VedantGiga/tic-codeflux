@@ -59,6 +59,20 @@ export default function PatientListScreen() {
     );
   };
 
+  const handleEdit = (patient: Patient) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push({
+      pathname: "/patients/add",
+      params: {
+        patientId: patient.id,
+        prefillName: patient.name,
+        prefillAge: String(patient.age),
+        prefillPhone: patient.phone,
+        prefillLanguage: patient.language,
+      },
+    });
+  };
+
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
@@ -127,13 +141,22 @@ export default function PatientListScreen() {
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.deleteBtn}
-                onPress={() => handleDelete(item)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Feather name="trash-2" size={16} color={Colors.missed} />
-              </TouchableOpacity>
+              <View style={styles.cardActions}>
+                <TouchableOpacity
+                  style={styles.editBtn}
+                  onPress={() => handleEdit(item)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Feather name="edit-2" size={15} color={Colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteBtn}
+                  onPress={() => handleDelete(item)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Feather name="trash-2" size={15} color={Colors.missed} />
+                </TouchableOpacity>
+              </View>
             </TouchableOpacity>
           )}
           contentContainerStyle={[styles.list, { paddingBottom: bottomPad + 24 }]}
@@ -242,5 +265,7 @@ const styles = StyleSheet.create({
   },
   dot: { color: Colors.textTertiary },
   patientPhone: { flexDirection: "row", alignItems: "center", gap: 5 },
+  cardActions: { flexDirection: "column", gap: 10, alignItems: "center" },
+  editBtn: { padding: 6 },
   deleteBtn: { padding: 6 },
 });

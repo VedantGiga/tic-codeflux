@@ -34,7 +34,10 @@ export async function makeReminderCall(
     return null;
   }
 
-  const webhookUrl = `https://${APP_BASE_URL}/api/twilio/voice`;
+  // Ensure no double https:// if the user included it in the .env variable
+  const safeBaseUrl = APP_BASE_URL.startsWith("http") ? APP_BASE_URL : `https://${APP_BASE_URL}`;
+  const webhookUrl = `${safeBaseUrl}/api/twilio/voice`;
+  const statusCallbackUrl = `${safeBaseUrl}/api/twilio/status`;
 
   const messageMap: Record<string, string> = {
     hindi: `${patientName} ji, aapka dawai ${medicineName} ki ${dosage} lene ka time ho gaya hai.`,
@@ -71,7 +74,7 @@ export async function makeReminderCall(
           To: phone,
           From: TWILIO_PHONE_NUMBER,
           Twiml: twiml,
-          StatusCallback: `https://${APP_BASE_URL}/api/twilio/status`,
+          StatusCallback: statusCallbackUrl,
           StatusCallbackMethod: "POST",
         }),
       },

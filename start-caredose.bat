@@ -45,7 +45,7 @@ echo  [STARTING] Launching Expo Mobile App...
 timeout /t 3 /nobreak >nul
 
 :: Use set "VAR=value" syntax to avoid trailing-space bug in Windows set command
-start "CareDose - Expo Mobile App" cmd /k "cd /d "%~dp0mobile\caredose" && set "EXPO_PUBLIC_API_URL=http://%LOCAL_IP%:3001/api" && npx expo start --clear"
+start "CareDose - Expo Mobile App" cmd /k "cd /d "%~dp0mobile\caredose" && npx expo start --clear"
 
 echo.
 echo  ========================================================
