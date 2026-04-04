@@ -23,6 +23,7 @@ import { aiApi, medicinesApi, patientsApi } from "@/lib/api";
 import type { AIExtractedMedicine, Patient } from "@/lib/api";
 import { usePatientStore } from "@/store/patientStore";
 import PatientAvatar from "@/components/PatientAvatar";
+import ScreenBackground from "@/components/ScreenBackground";
 
 export default function PrescriptionScannerScreen() {
   const insets = useSafeAreaInsets();
@@ -141,8 +142,9 @@ export default function PrescriptionScannerScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
+    <ScreenBackground>
+      <ScrollView
+        style={styles.container}
       contentContainerStyle={[
         styles.content,
         { paddingTop: topPad + 16, paddingBottom: bottomPad + 40 },
@@ -318,11 +320,12 @@ export default function PrescriptionScannerScreen() {
         </View>
       )}
     </ScrollView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   content: { paddingHorizontal: 24 },
   nav: {
     flexDirection: "row",

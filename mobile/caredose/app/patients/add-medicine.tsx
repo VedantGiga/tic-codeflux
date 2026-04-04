@@ -21,6 +21,7 @@ import * as Haptics from "expo-haptics";
 import { Colors } from "@/constants/colors";
 import { medicinesApi, patientsApi } from "@/lib/api";
 import { usePatientStore } from "@/store/patientStore";
+import ScreenBackground from "@/components/ScreenBackground";
 import type { MedicineTime } from "@/lib/api";
 
 const FREQUENCIES = [
@@ -171,7 +172,7 @@ export default function AddMedicineScreen() {
     const payload = {
       name: name.trim(),
       dosage: dosage.trim(),
-      frequency,
+      frequency: frequency as import("@/lib/api").Medicine["frequency"],
       times: selectedTimes,
       startDate,
     };
@@ -183,10 +184,11 @@ export default function AddMedicineScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <ScreenBackground>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
       <ScrollView
         style={styles.flex}
         contentContainerStyle={[
@@ -383,11 +385,12 @@ export default function AddMedicineScreen() {
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: Colors.background },
+  flex: { flex: 1 },
   container: { paddingHorizontal: 24 },
   nav: {
     flexDirection: "row",

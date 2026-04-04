@@ -12,12 +12,21 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
 
 export function FloatingTabBar({ state, descriptors, navigation }: any) {
   return (
     <View style={styles.container} pointerEvents="box-none">
       <BlurView intensity={40} tint="dark" style={styles.tabBar}>
+        <LinearGradient
+          colors={[Colors.glass.glossStart, Colors.glass.glossEnd]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.topGloss}
+          pointerEvents="none"
+        />
+        <View style={styles.thinEdge} pointerEvents="none" />
         {state.routes.map((route: any, index: number) => {
           const isFocused = state.index === index;
 
@@ -101,19 +110,32 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: "row",
-    backgroundColor: "rgba(20, 20, 22, 0.8)",
+    backgroundColor: Colors.glass.background,
     borderRadius: 50,
     paddingVertical: 8,
     paddingHorizontal: 8,
     gap: 4,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    borderColor: Colors.glass.border,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.4,
     shadowRadius: 32,
     elevation: 20,
+  },
+  topGloss: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+  },
+  thinEdge: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 0.5,
+    borderColor: Colors.glass.borderHighlight,
+    borderRadius: 49,
   },
   tabButton: {
     padding: 2,

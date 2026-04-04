@@ -119,7 +119,7 @@ export default function ActivityScreen() {
   const activePatient = patients.find((p) => p.id === activePatientId);
 
   return (
-    <ScreenBackground variant="cool">
+    <ScreenBackground>
       <View style={[styles.container, { paddingTop: topPad }]}>
         <View style={styles.header}>
           <Text style={styles.title}>Activity Log</Text>

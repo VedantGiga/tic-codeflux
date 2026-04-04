@@ -74,7 +74,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScreenBackground variant="warm">
+    <ScreenBackground>
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -185,11 +185,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.glass.borderElevated,
     marginBottom: 28,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    elevation: 6,
   },
   profileCardBlur: {
     backgroundColor: "rgba(255,255,255,0.04)",

@@ -1,5 +1,5 @@
 export const Colors = {
-  background: '#0F172A',
+  background: '#080C18',
   text: '#F8FAFC',
   textSecondary: '#94A3B8',
   taken: '#10B981',
@@ -10,6 +10,17 @@ export const Colors = {
   border: 'rgba(255, 255, 255, 0.1)',
   primary: '#3B82F6',
   glass: {
-    border: 'rgba(255, 255, 255, 0.1)',
-  }
+    border: 'rgba(255, 255, 255, 0.12)',
+    borderHighlight: 'rgba(255, 255, 255, 0.25)',
+    background: 'rgba(255, 255, 255, 0.04)',
+    innerOverlay: 'rgba(255, 255, 255, 0.06)',
+    glossStart: 'rgba(255, 255, 255, 0.15)',
+    glossEnd: 'rgba(255, 255, 255, 0.0)',
+  },
+  orb: {
+    primary: 'rgba(59, 130, 246, 0.35)',
+    secondary: 'rgba(139, 92, 246, 0.30)',
+    accent: 'rgba(236, 72, 153, 0.25)',
+    tertiary: 'rgba(6, 182, 212, 0.20)',
+  },
 };

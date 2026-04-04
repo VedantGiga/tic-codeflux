@@ -10,14 +10,64 @@ import {
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
 import type { MedicineDoseStatus } from "@/lib/api";
+import GlassCard from "./GlassCard";
 
 interface Props {
   dose: MedicineDoseStatus;
   onMarkTaken?: (logId: string) => void;
   onMarkMissed?: (logId: string) => void;
 }
+
+function GlassBadge({ statusConfig }: any) {
+  const blurIntensity = Platform.OS === "ios" ? 15 : 8;
+  return (
+    <View style={badgeStyles.outer}>
+      <BlurView intensity={blurIntensity} tint="dark" style={badgeStyles.blur}>
+        <View style={[badgeStyles.glow, { backgroundColor: statusConfig.color + "30" }]} />
+        <LinearGradient
+          colors={["rgba(255,255,255,0.4)", "transparent"]}
+          start={{ x: 0.5, y: 0.0 }}
+          end={{ x: 0.5, y: 0.5 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+        <Feather name={statusConfig.icon} size={11} color={statusConfig.color} />
+        <Text style={[badgeStyles.text, { color: statusConfig.color }]}>
+          {statusConfig.label.toUpperCase()}
+        </Text>
+      </BlurView>
+    </View>
+  );
+}
+
+const badgeStyles = StyleSheet.create({
+  outer: {
+    borderRadius: 8,
+    overflow: "hidden",
+    borderWidth: 0.5,
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+  blur: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+  glow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 8,
+  },
+  text: {
+    fontSize: 10,
+    fontFamily: "DMSans_700Bold",
+    letterSpacing: 0.8,
+  },
+});
 
 function formatTime(isoString: string): string {
   const date = new Date(isoString);
@@ -91,27 +141,17 @@ export default function MedicineDoseCard({ dose, onMarkTaken, onMarkMissed }: Pr
   };
 
   return (
-    <View style={styles.cardOuter}>
-      <BlurView
-        intensity={Platform.OS === "ios" ? 15 : 6}
-        tint="dark"
-        style={styles.cardBlur}
-      >
-        <View style={styles.cardRow}>
-          <View style={[styles.statusStrip, { backgroundColor: statusConfig.color }]} />
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <View style={styles.nameSection}>
-                <Text style={styles.medicineName}>{dose.medicineName}</Text>
-                <Text style={styles.dosage}>{dose.dosage}</Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: statusConfig.bg }]}>
-                <Feather name={statusConfig.icon} size={11} color={statusConfig.color} />
-                <Text style={[styles.badgeText, { color: statusConfig.color }]}>
-                  {statusConfig.label}
-                </Text>
-              </View>
+    <GlassCard style={styles.cardOuter} noPadding>
+      <View style={styles.cardRow}>
+        <View style={[styles.statusStrip, { backgroundColor: statusConfig.color + "66" }]} />
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <View style={styles.nameSection}>
+              <Text style={styles.medicineName}>{dose.medicineName}</Text>
+              <Text style={styles.dosage}>{dose.dosage}</Text>
             </View>
+            <GlassBadge statusConfig={statusConfig} />
+          </View>
 
             <View style={styles.footer}>
               <View style={styles.timeRow}>
@@ -124,49 +164,56 @@ export default function MedicineDoseCard({ dose, onMarkTaken, onMarkMissed }: Pr
                 )}
               </View>
 
-              {dose.status === "pending" && dose.logId && (
-                <View style={styles.actions}>
-                  <TouchableOpacity
-                    style={styles.actionBtnTaken}
-                    onPress={handleMarkTaken}
-                    activeOpacity={0.8}
-                  >
+            {dose.status === "pending" && dose.logId && (
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  style={styles.actionBtnGrid}
+                  onPress={handleMarkTaken}
+                  activeOpacity={0.7}
+                >
+                  <BlurView intensity={Platform.OS === "ios" ? 18 : 12} tint="dark" style={styles.btnBlur}>
+                    <View style={[StyleSheet.absoluteFillObject, { backgroundColor: Colors.taken + "25" }]} />
+                    <LinearGradient
+                      colors={["rgba(255,255,255,0.25)", "transparent"]}
+                      start={{ x: 0.5, y: 0 }}
+                      end={{ x: 0.5, y: 0.5 }}
+                      style={StyleSheet.absoluteFill}
+                      pointerEvents="none"
+                    />
                     <Feather name="check" size={13} color={Colors.taken} />
                     <Text style={[styles.actionText, { color: Colors.taken }]}>Taken</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.actionBtnMissed}
-                    onPress={handleMarkMissed}
-                    activeOpacity={0.8}
-                  >
+                  </BlurView>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.actionBtnGrid}
+                  onPress={handleMarkMissed}
+                  activeOpacity={0.7}
+                >
+                  <BlurView intensity={Platform.OS === "ios" ? 18 : 12} tint="dark" style={styles.btnBlur}>
+                    <View style={[StyleSheet.absoluteFillObject, { backgroundColor: Colors.missed + "25" }]} />
+                    <LinearGradient
+                      colors={["rgba(255,255,255,0.25)", "transparent"]}
+                      start={{ x: 0.5, y: 0 }}
+                      end={{ x: 0.5, y: 0.5 }}
+                      style={StyleSheet.absoluteFill}
+                      pointerEvents="none"
+                    />
                     <Feather name="x" size={13} color={Colors.missed} />
                     <Text style={[styles.actionText, { color: Colors.missed }]}>Missed</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
+                  </BlurView>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
-      </BlurView>
-    </View>
+      </View>
+    </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
   cardOuter: {
-    borderRadius: 16,
-    overflow: "hidden",
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: Colors.glass.border,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  cardBlur: {
-    backgroundColor: "rgba(255,255,255,0.03)",
   },
   cardRow: {
     flexDirection: "row",
@@ -244,23 +291,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
   },
-  actionBtnTaken: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: Colors.takenLight,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+  actionBtnGrid: {
+    borderRadius: 14,
+    overflow: "hidden",
+    borderWidth: 0.5,
+    borderColor: "rgba(255,255,255,0.15)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  actionBtnMissed: {
+  btnBlur: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: Colors.missedLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.02)",
   },
   actionText: {
     fontSize: 12,

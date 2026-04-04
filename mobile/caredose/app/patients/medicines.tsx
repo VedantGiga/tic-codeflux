@@ -17,6 +17,7 @@ import * as Haptics from "expo-haptics";
 import { Colors } from "@/constants/colors";
 import { medicinesApi, patientsApi } from "@/lib/api";
 import { usePatientStore } from "@/store/patientStore";
+import ScreenBackground from "@/components/ScreenBackground";
 import type { Medicine } from "@/lib/api";
 
 function formatTimes(times: Medicine["times"]): string {
@@ -159,7 +160,8 @@ export default function MedicinesScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: topPad }]}>
+    <ScreenBackground>
+      <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={Colors.text} />
@@ -226,11 +228,12 @@ export default function MedicinesScreen() {
         <Feather name="plus" size={24} color={Colors.background} />
       </TouchableOpacity>
     </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",

@@ -21,7 +21,7 @@ export const Colors = {
   pendingLight: "rgba(251, 191, 36, 0.12)",
 
   // === Backgrounds (layered depth) ===
-  background: "#0A0A0A",
+  background: "#080C18", // deeper, richer dark for liquid-glass depth
   surface: "rgba(255, 255, 255, 0.05)",
   surfaceAlt: "rgba(255, 255, 255, 0.03)",
   surfaceElevated: "rgba(255, 255, 255, 0.08)",
@@ -36,7 +36,7 @@ export const Colors = {
   textSecondary: "#8E8E93",
   textTertiary: "#48484A",
   textInverse: "#FFFFFF",
-  textWarm: "#E8DCC8",      // Warm cream for editorial headlines
+  textWarm: "#34D399",      // Vibrant emerald green instead of warm cream
 
   // === Semantic ===
   success: "#34D399",
@@ -47,14 +47,25 @@ export const Colors = {
   // === Glass effect helpers ===
   glass: {
     background: "rgba(255, 255, 255, 0.05)",
-    border: "rgba(255, 255, 255, 0.08)",
-    backgroundElevated: "rgba(255, 255, 255, 0.08)",
-    borderElevated: "rgba(255, 255, 255, 0.12)",
+    border: "rgba(255, 255, 255, 0.15)",
+    borderHighlight: "rgba(255, 255, 255, 0.45)", // Stronger edge light
+    innerOverlay: "rgba(255, 255, 255, 0.12)",
+    backgroundElevated: "rgba(255, 255, 255, 0.1)",
+    borderElevated: "rgba(255, 255, 255, 0.2)",
+    glossStart: "rgba(255, 255, 255, 0.35)", // Brighter gloss
+    glossEnd: "rgba(255, 255, 255, 0.0)",
   },
 
   gradient: {
     start: "#34D399",
     end: "#059669",
+  },
+  
+  orb: {
+    primary: "rgba(52, 211, 153, 0.35)",    // emerald
+    secondary: "rgba(129, 140, 248, 0.30)",  // indigo
+    accent: "rgba(251, 191, 36, 0.25)",     // amber
+    tertiary: "rgba(56, 189, 248, 0.20)",    // sky
   },
 };
 
